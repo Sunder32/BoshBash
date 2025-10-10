@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { AlertCircle, Shield, Zap, Users, Sparkles, Clock, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, Shield, Zap, Users, Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -25,10 +25,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-12 bg-slate-950 text-slate-100">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="floating-shape" />
-        <div className="floating-shape" />
-      </div>
+      {/* Emergency lights */}
+      <div className="emergency-light-red" style={{ top: '10%', left: '10%' }} />
+      <div className="emergency-light-blue" style={{ bottom: '10%', right: '10%' }} />
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="aurora-wrapper rounded-[3rem] bg-slate-900/40 border border-white/10 shadow-[0_40px_80px_-45px_rgba(15,23,42,0.9)]">
@@ -77,32 +76,20 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>
-
-              <div className="mt-10 flex flex-wrap gap-4 text-sm text-white/70">
-                <div className="stat-pill bg-white/15 text-white/85 border-white/20">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Готово к промышленной эксплуатации
-                </div>
-                <div className="stat-pill bg-white/15 text-white/85 border-white/20">
-                  <Clock className="w-4 h-4" />
-                  Время реакции <span className="font-semibold">&lt; 60 секунд</span>
-                </div>
-              </div>
             </div>
 
             {/* Login Side */}
             <div className="relative">
-              <div className="gradient-border h-full">
-                <div className="gradient-border-inner p-8 sm:p-10 backdrop-blur-md">
-                  <div className="mb-8">
-                    <p className="section-title">Войти в систему</p>
-                    <h2 className="mt-3 text-2xl sm:text-3xl font-semibold text-slate-900">
-                      Управление инцидентами и аналитика в одном окне
-                    </h2>
-                    <p className="mt-2 text-sm text-slate-500">
-                      Используйте корпоративный аккаунт, чтобы получить доступ к панели управления и последним тревогам.
-                    </p>
-                  </div>
+              <div className="p-8 sm:p-10 backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/20 shadow-2xl">
+                <div className="mb-8">
+                  <p className="section-title text-white/90">Войти в систему</p>
+                  <h2 className="mt-3 text-2xl sm:text-3xl font-semibold text-white drop-shadow-lg">
+                    Управление инцидентами и аналитика в одном окне
+                  </h2>
+                  <p className="mt-2 text-sm text-white/90 drop-shadow">
+                    Используйте корпоративный аккаунт, чтобы получить доступ к панели управления и последним тревогам.
+                  </p>
+                </div>
 
                   {error && (
                     <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 animate-fade-in">
@@ -113,7 +100,7 @@ export default function LoginPage() {
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-semibold text-slate-600">
+                      <label htmlFor="email" className="block text-sm font-semibold text-white drop-shadow">
                         Email адрес
                       </label>
                       <input
@@ -123,13 +110,13 @@ export default function LoginPage() {
                         autoComplete="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="input-modern"
+                        className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
                         placeholder="dispatcher@rescue.ru"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label htmlFor="password" className="block text-sm font-semibold text-slate-600">
+                      <label htmlFor="password" className="block text-sm font-semibold text-white drop-shadow">
                         Пароль
                       </label>
                       <input
@@ -139,7 +126,7 @@ export default function LoginPage() {
                         autoComplete="current-password"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="input-modern"
+                        className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
                         placeholder="Введите пароль"
                       />
                     </div>
@@ -163,28 +150,27 @@ export default function LoginPage() {
                     </button>
                   </form>
 
-                  <div className="mt-8 text-center text-sm text-slate-500">
+                  <div className="mt-8 text-center text-sm text-white/95">
                     Нет аккаунта?{' '}
                     <Link
                       to="/register"
-                      className="text-rose-500 hover:text-rose-600 font-semibold transition-colors"
+                      className="text-amber-300 hover:text-amber-200 font-semibold transition-colors underline decoration-2 underline-offset-2"
                     >
                       Зарегистрироваться
                     </Link>
                   </div>
 
-                  <div className="mt-10 grid gap-3 bg-slate-50/70 border border-slate-100 rounded-2xl p-4">
-                    <div className="flex items-center gap-3 text-sm text-slate-500">
-                      <Shield className="w-4 h-4 text-emerald-500" />
+                  <div className="mt-10 grid gap-3 bg-transparent backdrop-blur-md border border-white/20 rounded-2xl p-5 shadow-lg">
+                    <div className="flex items-center gap-3 text-sm text-white/95">
+                      <Shield className="w-4 h-4 text-emerald-300" />
                       <span>Шифрование TLS 1.3 и контроль доступа по ролям</span>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-slate-500">
-                      <Sparkles className="w-4 h-4 text-amber-500" />
+                    <div className="flex items-center gap-3 text-sm text-white/95">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
                       <span>Система автоматически анализирует сообщения по ключевым словам</span>
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
           </div>
         </div>

@@ -166,7 +166,7 @@
   }
 
   .gradient-border > .gradient-border-inner {
-    @apply bg-white/95 rounded-[1.65rem] h-full w-full;
+    @apply bg-transparent rounded-[1.65rem] h-full w-full;
   }
 
   .progress-track {
@@ -439,5 +439,50 @@
 
 .animate-scaleIn {
   animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Emergency lights animation */
+@keyframes emergency-pulse-red {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes emergency-pulse-blue {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+}
+
+.emergency-light-red {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.6) 0%, rgba(239, 68, 68, 0.3) 30%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: emergency-pulse-red 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.emergency-light-blue {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0.3) 30%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: emergency-pulse-blue 1.5s ease-in-out infinite;
+  pointer-events: none;
 }
 
