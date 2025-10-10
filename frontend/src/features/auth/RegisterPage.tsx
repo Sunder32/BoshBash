@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { AlertCircle } from 'lucide-react'
@@ -13,7 +13,6 @@ interface RegisterForm {
 export default function RegisterPage() {
   const navigate = useNavigate()
   const { register, isLoading, error, clearError } = useAuthStore()
-  const formRef = useRef<HTMLFormElement | null>(null)
   
   const [formData, setFormData] = useState<RegisterForm>({
     email: '',
@@ -42,27 +41,9 @@ export default function RegisterPage() {
       })
       navigate('/')
     } catch (err) {
+      console.error('Registration error:', err)
     }
   }
-
-  const triggerSubmit = useCallback(() => {
-    if (isLoading) {
-      return
-    }
-    formRef.current?.requestSubmit()
-  }, [isLoading])
-
-  const handleTouchEnd = useCallback((event: React.TouchEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    triggerSubmit()
-  }, [triggerSubmit])
-
-  const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      triggerSubmit()
-    }
-  }, [triggerSubmit])
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-12 bg-slate-950 text-slate-100">
@@ -91,7 +72,7 @@ export default function RegisterPage() {
           </div>
         )}
 
-  <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+  <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="register-email" className="block text-sm font-semibold text-white drop-shadow mb-2">
               Email *
@@ -161,8 +142,6 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            onTouchEnd={handleTouchEnd}
-            onKeyUp={handleKeyUp}
             className="btn-primary w-full text-base disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
           >
             {isLoading ? (

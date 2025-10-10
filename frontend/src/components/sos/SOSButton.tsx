@@ -944,6 +944,13 @@ ${voiceTranscription}`
         title: title || 'default'
       })
       
+      // Очищаем поля формы ДО анализа
+      setDescription('')
+      setTitle('')
+      setManualLatitude('')
+      setManualLongitude('')
+      setUseManualLocation(false)
+      
       if (currentDescription && currentDescription.length >= 10) {
         console.log('🔄 Starting advice analysis...')
         try {
@@ -981,6 +988,12 @@ ${voiceTranscription}`
             console.log('🎯 Setting showAIModal to true')
             setShowAIModal(true)
             
+            // Закрываем форму SOS через 2 секунды, оставляя открытым окно с рекомендациями
+            setTimeout(() => {
+              setShowModal(false)
+              setSuccessMessage(null)
+            }, 2000)
+            
             // Проверка через небольшую задержку
             setTimeout(() => {
               console.log('🔍 Modal state check:', {
@@ -991,6 +1004,10 @@ ${voiceTranscription}`
           }
         } catch (err: any) {
           console.error('❌ Analysis failed:', err)
+          // Если анализ не удался, закрываем форму через 4 секунды
+          setTimeout(() => {
+            handleClose()
+          }, 4000)
         }
       } else {
         console.log('⚠️ No description or too short, skipping analysis')
@@ -999,12 +1016,6 @@ ${voiceTranscription}`
           handleClose()
         }, 4000)
       }
-
-      setDescription('')
-      setTitle('')
-      setManualLatitude('')
-      setManualLongitude('')
-      setUseManualLocation(false)
       
       setTimeout(() => {
         setIsEmergency(false)
