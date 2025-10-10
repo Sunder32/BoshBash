@@ -82,12 +82,15 @@ async def create_alert(
     """
     # Автоматический анализ описания для получения советов
     advice_data = None
+    calculated_priority = 3  # По умолчанию средний приоритет
+    
     if alert_data.description:
         try:
             advice_result = keyword_advisor.analyze(alert_data.description)
+            calculated_priority = advice_result.get("priority", 3)  # Получаем вычисленный приоритет
             advice_data = {
                 "detected_type": advice_result.get("detected_type"),
-                "priority_suggestion": advice_result.get("priority"),
+                "priority_suggestion": calculated_priority,
                 "severity": advice_result.get("severity"),
                 "confidence": advice_result.get("confidence"),
                 "matched_keywords": advice_result.get("matched_keywords", []),
@@ -100,6 +103,7 @@ async def create_alert(
     new_alert = SOSAlert(
         user_id=current_user.id,
         type=alert_data.type.value if hasattr(alert_data.type, 'value') else str(alert_data.type),
+        priority=calculated_priority,  # Устанавливаем вычисленный приоритет
         latitude=alert_data.latitude,
         longitude=alert_data.longitude,
         title=alert_data.title,
