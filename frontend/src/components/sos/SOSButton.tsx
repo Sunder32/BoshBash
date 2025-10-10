@@ -342,20 +342,6 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
     }
   }, [autoOpen, getLocation])
 
-  const resolveProviderLabel = (analysis: AIAnalysis | null): string => {
-    if (!analysis) return 'Автоматический анализ'
-    const rawProvider = analysis.provider ?? analysis.model_used
-    if (!rawProvider) return 'Автоматический анализ'
-    const normalized = rawProvider.toLowerCase()
-    if (normalized.includes('keyword')) {
-      return 'Система ключевых слов'
-    }
-    if (normalized.includes('gigachat')) {
-      return 'Система рекомендаций (устарело)'
-    }
-    return rawProvider
-  }
-
   const getPriorityMeta = (analysis: AIAnalysis) => {
     const fromReference = analysis.reference?.priorities?.find(
       (item) => item.level === analysis.priority
@@ -1713,7 +1699,6 @@ ${voiceTranscription}`
       {/* Advice Modal */}
       {showAIModal && aiAnalysis && ((() => {
         console.log('🎨 Rendering Advice Modal:', { showAIModal, hasAnalysis: !!aiAnalysis })
-        const providerLabel = resolveProviderLabel(aiAnalysis)
         const priorityMeta = getPriorityMeta(aiAnalysis)
         const severityMeta = getSeverityMeta(aiAnalysis)
         const typeMeta = getTypeMeta(aiAnalysis)
@@ -1749,29 +1734,30 @@ ${voiceTranscription}`
         ].filter((chip) => Boolean(chip.label))
 
         return (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="card-modern max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-slide-up">
-              <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 sm:p-6 rounded-t-2xl z-10">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-slide-up border border-slate-700">
+              <div className="sticky top-0 bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 text-white p-5 sm:p-6 rounded-t-2xl z-10 shadow-lg">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
-                      <Sparkles className="w-6 h-6 animate-pulse" />
+                    <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl shadow-inner">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
-                        <span>📋 Рекомендации</span>
-                        <span className="text-sm text-purple-100">{providerLabel}</span>
+                        <span>📋 Рекомендации по безопасности</span>
                       </h2>
-                      <p className="text-sm opacity-90">
+                      <p className="text-sm opacity-90 text-orange-100">
                         {confidenceValue !== null
-                          ? `Уверенность: ${confidenceValue}%`
-                          : 'Уверенность уточняется'}
+                          ? `Точность распознавания: ${confidenceValue}%`
+                          : 'Анализ ключевых слов'}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowAIModal(false)}
-                    className="text-purple-50 hover:text-white text-2xl"
+                    className="text-white/80 hover:text-white text-2xl transition-colors bg-white/10 hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center"
                   >
                     ✕
                   </button>
@@ -1779,18 +1765,19 @@ ${voiceTranscription}`
               </div>
 
               {/* Success Banner */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="p-5 sm:p-6 bg-gradient-to-br from-green-900/30 to-emerald-900/20 border-l-4 border-green-500">
                 <div className="flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <CheckCircle className="w-6 h-6 text-green-400" />
                   <div>
-                    <p className="font-semibold text-green-900">Вызов успешно отправлен!</p>
-                    <p className="text-sm text-green-700">
+                    <p className="font-semibold text-green-100">Вызов успешно отправлен!</p>
+                    <p className="text-sm text-green-300">
                       Спасатели получили уведомление и уже направляются к вам
                     </p>
                   </div>
                 </div>
               </div>
 
+              <div className="p-5 sm:p-6 bg-slate-800/50">
               {metadataChips.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {metadataChips.map((chip) => (
@@ -1818,18 +1805,18 @@ ${voiceTranscription}`
                   <p className="mt-3 text-xs text-white/80 leading-relaxed">{priorityMeta.description}</p>
                 </div>
 
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm text-blue-600 font-medium">Тип чрезвычайной ситуации</p>
-                  <p className="mt-1 text-xl font-bold text-blue-800">{typeMeta.name}</p>
-                  <p className="mt-2 text-xs text-blue-700 leading-relaxed">{typeMeta.description}</p>
+                <div className="rounded-2xl border border-slate-600 bg-gradient-to-br from-blue-900/40 to-blue-800/30 p-4 backdrop-blur-sm">
+                  <p className="text-sm text-blue-300 font-medium">Тип чрезвычайной ситуации</p>
+                  <p className="mt-1 text-xl font-bold text-blue-100">{typeMeta.name}</p>
+                  <p className="mt-2 text-xs text-blue-200 leading-relaxed">{typeMeta.description}</p>
                   {aiAnalysis.warning && (
-                    <p className="mt-3 text-xs font-semibold text-red-600" title="Предупреждение модели">
+                    <p className="mt-3 text-xs font-semibold text-red-400 bg-red-950/40 px-2 py-1 rounded" title="Предупреждение">
                       ⚠️ {aiAnalysis.warning}
                     </p>
                   )}
                 </div>
 
-                <div className={`rounded-2xl p-4 ${severityStyles.bannerClass}`}>
+                <div className={`rounded-2xl p-4 border border-slate-600 backdrop-blur-sm ${severityStyles.bannerClass}`}>
                   <p className="text-sm font-medium">Тяжесть последствий</p>
                   <p className="mt-1 text-xl font-bold flex items-center gap-2">
                     <span>{severityStyles.icon}</span>
@@ -1843,24 +1830,24 @@ ${voiceTranscription}`
               </div>
 
               {/* Risk Assessment */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="bg-gradient-to-br from-yellow-900/30 to-amber-900/20 border border-yellow-700/50 rounded-lg p-4 mb-4">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-semibold text-yellow-900 mb-1">Оценка рисков</p>
-                    <p className="text-sm text-yellow-800">
+                    <p className="font-semibold text-yellow-200 mb-1">Оценка рисков</p>
+                    <p className="text-sm text-yellow-100">
                       {aiAnalysis.risk_assessment || 'Требуется уточнение'}
                     </p>
 
                     {aiAnalysis.notes && (
-                      <p className="mt-3 text-xs text-yellow-700">{aiAnalysis.notes}</p>
+                      <p className="mt-3 text-xs text-yellow-200/80">{aiAnalysis.notes}</p>
                     )}
 
                     {aiAnalysis.error && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                        <p className="text-xs font-semibold text-red-800 mb-1">⚠️ Ошибка анализа</p>
-                        <p className="text-xs text-red-700">{aiAnalysis.error}</p>
-                        <p className="text-xs text-red-600 mt-2">
+                      <div className="mt-3 p-3 bg-red-950/50 border border-red-800 rounded">
+                        <p className="text-xs font-semibold text-red-300 mb-1">⚠️ Ошибка анализа</p>
+                        <p className="text-xs text-red-200">{aiAnalysis.error}</p>
+                        <p className="text-xs text-red-300/80 mt-2">
                           Возможные причины: временная сетевая проблема или недоступность сервиса.
                           Вызов успешно отправлен, но рекомендации могли быть неполными.
                         </p>
@@ -1872,16 +1859,16 @@ ${voiceTranscription}`
 
               {/* Immediate Actions */}
               {aiAnalysis.immediate_actions && aiAnalysis.immediate_actions.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-red-600">⚡</span>
+                <div className="mb-4 bg-gradient-to-br from-red-900/30 to-orange-900/20 border border-red-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-red-300 mb-3 flex items-center gap-2 text-lg">
+                    <span className="text-red-400">⚡</span>
                     Немедленные действия
                   </h3>
                   <ul className="space-y-2">
                     {aiAnalysis.immediate_actions.map((action, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <span className="text-red-600 font-bold">{index + 1}.</span>
-                        <span className="text-gray-700">{action}</span>
+                      <li key={index} className="flex items-start gap-3 text-sm bg-slate-900/40 p-3 rounded-lg">
+                        <span className="text-red-400 font-bold text-lg min-w-[24px]">{index + 1}.</span>
+                        <span className="text-slate-100">{action}</span>
                       </li>
                     ))}
                   </ul>
@@ -1890,16 +1877,16 @@ ${voiceTranscription}`
 
               {/* Required Resources */}
               {aiAnalysis.required_resources && aiAnalysis.required_resources.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-blue-600">🚒</span>
+                <div className="mb-4 bg-gradient-to-br from-blue-900/30 to-cyan-900/20 border border-blue-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-300 mb-3 flex items-center gap-2 text-lg">
+                    <span className="text-blue-400">🚒</span>
                     Необходимые ресурсы
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {aiAnalysis.required_resources.map((resource, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                        className="px-3 py-2 bg-blue-900/50 text-blue-200 border border-blue-700 rounded-lg text-sm font-medium"
                       >
                         {resource}
                       </span>
@@ -1910,9 +1897,9 @@ ${voiceTranscription}`
 
               {/* Estimated Victims */}
               {aiAnalysis.estimated_victims !== null && (
-                <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <p className="text-sm text-purple-600 font-medium">Пострадавшие</p>
-                  <p className="text-xl font-bold text-purple-700">
+                <div className="mb-4 bg-gradient-to-br from-purple-900/30 to-pink-900/20 border border-purple-700/50 rounded-lg p-4">
+                  <p className="text-sm text-purple-300 font-medium">Пострадавшие</p>
+                  <p className="text-xl font-bold text-purple-100">
                     Примерно {aiAnalysis.estimated_victims} человек(а)
                   </p>
                 </div>
@@ -1920,13 +1907,13 @@ ${voiceTranscription}`
 
               {/* Keywords */}
               {aiAnalysis.keywords && aiAnalysis.keywords.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 text-sm">Ключевые слова</h3>
+                <div className="mb-4 bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-slate-200 mb-2 text-sm">Ключевые слова</h3>
                   <div className="flex flex-wrap gap-2">
                     {aiAnalysis.keywords.map((keyword, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                        className="px-3 py-1 bg-slate-700/50 text-slate-300 border border-slate-600 rounded-lg text-xs"
                       >
                         #{keyword}
                       </span>
@@ -1937,43 +1924,42 @@ ${voiceTranscription}`
 
               {/* Location Hints */}
               {aiAnalysis.location_hints && aiAnalysis.location_hints.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-green-600" />
+                <div className="mb-6 bg-gradient-to-br from-green-900/30 to-emerald-900/20 border border-green-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-300 mb-2 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-400" />
                     Подсказки по местоположению
                   </h3>
                   <ul className="space-y-1">
                     {aiAnalysis.location_hints.map((hint, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="text-green-600">•</span>
+                      <li key={index} className="text-sm text-green-200 flex items-start gap-2">
+                        <span className="text-green-400">•</span>
                         <span>{hint}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
+              </div>
 
               {/* Close Button */}
+              <div className="p-5 sm:p-6 bg-slate-900/50 border-t border-slate-700">
               <button
                 onClick={() => setShowAIModal(false)}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                className="w-full px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all font-semibold shadow-lg"
               >
                 Понятно
               </button>
 
               {/* Debug Info */}
               <details className="mt-4 text-xs">
-                <summary className="cursor-pointer text-gray-500 hover:text-gray-700">
+                <summary className="cursor-pointer text-slate-400 hover:text-slate-300">
                   🐛 Debug: Показать полные данные
                 </summary>
-                <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-60">
+                <pre className="mt-2 p-3 bg-slate-950 rounded text-xs overflow-auto max-h-60 text-slate-300">
                   {JSON.stringify(aiAnalysis, null, 2)}
                 </pre>
               </details>
-
-              <p className="text-xs text-center text-gray-500 mt-4">
-                Анализ выполнен с помощью {providerLabel}
-              </p>
+              </div>
             </div>
           </div>
         )
