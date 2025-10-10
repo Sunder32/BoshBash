@@ -245,7 +245,6 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
   const [description, setDescription] = useState('')
   const [title, setTitle] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [manualLatitude, setManualLatitude] = useState('')
   const [manualLongitude, setManualLongitude] = useState('')
@@ -342,20 +341,6 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
       getLocation()
     }
   }, [autoOpen, getLocation])
-
-  const resolveProviderLabel = (analysis: AIAnalysis | null): string => {
-    if (!analysis) return 'AI-помощник'
-    const rawProvider = analysis.provider ?? analysis.model_used
-    if (!rawProvider) return 'AI-помощник'
-    const normalized = rawProvider.toLowerCase()
-    if (normalized.includes('yandex')) {
-      return 'Яндекс GPT Lite'
-    }
-    if (normalized.includes('gigachat')) {
-      return 'Сбер GigaChat (устарело)'
-    }
-    return rawProvider
-  }
 
   const getPriorityMeta = (analysis: AIAnalysis) => {
     const fromReference = analysis.reference?.priorities?.find(
@@ -504,36 +489,35 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
     }
 
     try {
-      const response = await api.post('/api/v1/ai/analyze/text', {
-        text: cleanedText,
-        analysis_type: 'classify',
-        source: 'speech_recognition'
+      const response = await api.post('/api/v1/advice/analyze', {
+        description: cleanedText
       })
 
-      if (response.data?.success && response.data.analysis) {
-        const analysis = response.data.analysis as AIAnalysis
+      if (response.data) {
+        const analysis = response.data
         const normalized: VoiceAnalysisResult = {
           transcription: cleanedText,
-          emergency_type: analysis.type,
+          emergency_type: analysis.detected_type || analysis.emergency_type,
           priority: analysis.priority,
           severity: analysis.severity,
-          description: analysis.notes || analysis.risk_assessment || analysis.type_description,
-          location_info: analysis.location_hints?.[0],
+          description: analysis.type_name || analysis.detected_type,
+          location_info: undefined,
           required_resources: analysis.required_resources,
           immediate_actions: analysis.immediate_actions,
-          keywords: analysis.keywords,
-          confidence: analysis.confidence,
-          time_sensitive: Boolean(analysis.immediate_actions?.some((action) => /немедлен/i.test(action)))
+          recommendations: analysis.safety_tips,
+          keywords: analysis.matched_keywords || analysis.keywords,
+          confidence: analysis.confidence || 0.8,
+          time_sensitive: Boolean(analysis.immediate_actions?.some((action: string) => /немедлен/i.test(action)))
         }
 
         setVoiceAnalysis(normalized)
 
-        if (analysis.type && TYPE_FALLBACKS[analysis.type]) {
-          setEmergencyType(analysis.type as EmergencyType)
+        if (analysis.detected_type && TYPE_FALLBACKS[analysis.detected_type]) {
+          setEmergencyType(analysis.detected_type as EmergencyType)
         }
 
         if (!title.trim()) {
-          const candidate = analysis.type_name || analysis.type || cleanedText.slice(0, 120)
+          const candidate = analysis.type_name || analysis.detected_type || cleanedText.slice(0, 120)
           setTitle(candidate.slice(0, 120))
         }
 
@@ -907,45 +891,6 @@ ${voiceTranscription}`
     await getLocation()
   }
 
-  const analyzeWithAI = async () => {
-    if (!description || description.length < 10) {
-      setError('Пожалуйста, добавьте более подробное описание для AI анализа')
-      return
-    }
-
-    setIsAnalyzing(true)
-    setError(null)
-
-    try {
-      const response = await api.post('/api/v1/ai/analyze/text', {
-        text: description,
-        analysis_type: 'classify'
-      })
-
-      console.log('🤖 AI Response:', response.data)
-
-      if (response.data.success) {
-        const analysis = response.data.analysis
-        console.log('📊 AI Analysis:', analysis)
-        console.log('🎯 Confidence:', analysis.confidence)
-        console.log('⚡ Immediate Actions:', analysis.immediate_actions)
-        console.log('📋 Risk Assessment:', analysis.risk_assessment)
-        
-        setAiAnalysis(analysis)
-        setShowAIModal(true)
-        
-        if (analysis.type) {
-          setEmergencyType(analysis.type as EmergencyType)
-        }
-      }
-    } catch (err: any) {
-      console.error('AI analysis failed:', err)
-  setError('Не удалось выполнить анализ в Яндекс GPT. Продолжаем без рекомендаций.')
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
   const handleSubmitEmergency = async () => {
     let finalLatitude: number | null = hasCoordinates ? latitude! : null
     let finalLongitude: number | null = hasCoordinates ? longitude! : null
@@ -986,25 +931,84 @@ ${voiceTranscription}`
         description: description || 'Требуется помощь',
       })
 
-      if (description && description.length >= 10) {
-        await analyzeWithAI()
+      setIsEmergency(true)
+      setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
+      
+      // Показываем рекомендации, если есть описание
+      const currentDescription = description
+      console.log('📝 Description:', currentDescription)
+      console.log('📏 Description length:', currentDescription?.length)
+      console.log('📋 Current state:', { 
+        emergencyType, 
+        hasCoordinates,
+        title: title || 'default'
+      })
+      
+      if (currentDescription && currentDescription.length >= 10) {
+        console.log('🔄 Starting advice analysis...')
+        try {
+          const response = await api.post('/api/v1/advice/analyze', {
+            description: currentDescription
+          })
+
+          console.log('✅ Advice response received:', response.data)
+
+          if (response.data) {
+            const analysis = response.data
+            
+            // Нормализация структуры для совместимости с интерфейсом AIAnalysis
+            const normalizedAnalysis: AIAnalysis = {
+              type: analysis.detected_type || analysis.emergency_type || 'general',
+              type_name: analysis.type_name,
+              priority: analysis.priority || 3,
+              severity: analysis.severity || 'medium',
+              keywords: analysis.matched_keywords || [],
+              confidence: analysis.confidence || 0.5,
+              estimated_victims: null,
+              location_hints: [],
+              required_resources: analysis.required_resources || [],
+              immediate_actions: analysis.immediate_actions || [],
+              risk_assessment: analysis.warning || `Уровень опасности: ${analysis.severity}`,
+              warning: analysis.warning,
+              notes: analysis.secondary_types?.length > 0 
+                ? `Возможно также: ${analysis.secondary_types.join(', ')}` 
+                : null,
+              model_used: analysis.method || 'keyword_matching'
+            }
+            
+            console.log('📊 Normalized analysis:', normalizedAnalysis)
+            setAiAnalysis(normalizedAnalysis)
+            console.log('🎯 Setting showAIModal to true')
+            setShowAIModal(true)
+            
+            // Проверка через небольшую задержку
+            setTimeout(() => {
+              console.log('🔍 Modal state check:', {
+                showAIModal: true,
+                hasAnalysis: !!normalizedAnalysis
+              })
+            }, 100)
+          }
+        } catch (err: any) {
+          console.error('❌ Analysis failed:', err)
+        }
+      } else {
+        console.log('⚠️ No description or too short, skipping analysis')
+        // Если нет описания, просто закрываем форму через 4 секунды
+        setTimeout(() => {
+          handleClose()
+        }, 4000)
       }
 
-      setIsEmergency(true)
       setDescription('')
       setTitle('')
       setManualLatitude('')
       setManualLongitude('')
       setUseManualLocation(false)
-      setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
       
       setTimeout(() => {
         setIsEmergency(false)
       }, 5000)
-
-      setTimeout(() => {
-        handleClose()
-      }, 4000)
     } catch (err: any) {
       console.error('Failed to create SOS alert:', err)
       setError(err.response?.data?.detail || 'Не удалось отправить сигнал SOS')
@@ -1141,7 +1145,7 @@ ${voiceTranscription}`
                   <div className="flex items-center gap-2">
                     <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
                       <Sparkles className="h-4 w-4" />
-                      AI-приоритизация активна
+                      Автоматическая приоритизация
                     </span>
                     <button
                       type="button"
@@ -1416,7 +1420,7 @@ ${voiceTranscription}`
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         {voiceConfidence && (
                           <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold text-white/80">
-                            ⚙️ Уверенность AI: {voiceConfidence}
+                            ⚙️ Уверенность: {voiceConfidence}
                           </span>
                         )}
                         {isRecording && (
@@ -1662,18 +1666,13 @@ ${voiceTranscription}`
                   <button
                     type="button"
                     onClick={handleSubmitEmergency}
-                    disabled={isSubmitting || isAnalyzing}
+                    disabled={isSubmitting}
                     className="btn-primary flex-1"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
                         <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         Отправка...
-                      </span>
-                    ) : isAnalyzing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Sparkles className="h-5 w-5 animate-pulse" />
-                        AI анализ...
                       </span>
                     ) : (
                       '🚨 Отправить SOS'
@@ -1697,9 +1696,9 @@ ${voiceTranscription}`
         </div>
       )}
 
-      {/* AI Analysis Modal */}
-      {showAIModal && aiAnalysis && (() => {
-        const providerLabel = resolveProviderLabel(aiAnalysis)
+      {/* Advice Modal */}
+      {showAIModal && aiAnalysis && ((() => {
+        console.log('🎨 Rendering Advice Modal:', { showAIModal, hasAnalysis: !!aiAnalysis })
         const priorityMeta = getPriorityMeta(aiAnalysis)
         const severityMeta = getSeverityMeta(aiAnalysis)
         const typeMeta = getTypeMeta(aiAnalysis)
@@ -1735,48 +1734,61 @@ ${voiceTranscription}`
         ].filter((chip) => Boolean(chip.label))
 
         return (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="card-modern max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-slide-up">
-              <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-5 sm:p-6 rounded-t-2xl z-10">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto animate-slide-up border border-slate-700">
+              <div className="sticky top-0 bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 text-white p-5 sm:p-6 rounded-t-2xl z-10 shadow-lg">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
-                      <Sparkles className="w-6 h-6 animate-pulse" />
+                    <div className="bg-white/20 backdrop-blur-md p-3 rounded-xl shadow-inner">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
-                        <span>🤖 Анализ ситуации</span>
-                        <span className="text-sm text-purple-100">{providerLabel}</span>
+                        <span>📋 Рекомендации по безопасности</span>
                       </h2>
-                      <p className="text-sm opacity-90">
+                      <p className="text-sm opacity-90 text-orange-100">
                         {confidenceValue !== null
-                          ? `Уверенность модели: ${confidenceValue}%`
-                          : 'Уверенность модели уточняется'}
+                          ? `Точность распознавания: ${confidenceValue}%`
+                          : 'Анализ ключевых слов'}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowAIModal(false)}
-                    className="text-purple-50 hover:text-white text-2xl"
+                    className="text-white/80 hover:text-white text-2xl transition-colors bg-white/10 hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center"
                   >
                     ✕
                   </button>
                 </div>
               </div>
 
-              {/* Success Banner */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  <div>
-                    <p className="font-semibold text-green-900">Вызов успешно отправлен!</p>
-                    <p className="text-sm text-green-700">
-                      Спасатели получили уведомление и уже направляются к вам
+              {/* Success Banner with Animation */}
+              <div className="relative overflow-hidden p-5 sm:p-6 bg-gradient-to-br from-green-900/40 to-emerald-900/30 border-l-4 border-green-400 shadow-lg">
+                {/* Animated background pulse */}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 animate-pulse"></div>
+                
+                <div className="relative flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping"></div>
+                      <CheckCircle className="relative w-8 h-8 text-green-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-lg text-green-100 mb-1">✅ Вызов успешно отправлен!</p>
+                    <p className="text-sm text-green-200">
+                      Спасательная служба получила уведомление и уже направляется к вам
+                    </p>
+                    <p className="text-xs text-green-300/80 mt-1">
+                      🚨 Оставайтесь на связи • Время реагирования: 5-15 минут
                     </p>
                   </div>
                 </div>
               </div>
 
+              <div className="p-5 sm:p-6 bg-slate-800/50">
               {metadataChips.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {metadataChips.map((chip) => (
@@ -1804,18 +1816,18 @@ ${voiceTranscription}`
                   <p className="mt-3 text-xs text-white/80 leading-relaxed">{priorityMeta.description}</p>
                 </div>
 
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm text-blue-600 font-medium">Тип чрезвычайной ситуации</p>
-                  <p className="mt-1 text-xl font-bold text-blue-800">{typeMeta.name}</p>
-                  <p className="mt-2 text-xs text-blue-700 leading-relaxed">{typeMeta.description}</p>
+                <div className="rounded-2xl border border-slate-600 bg-gradient-to-br from-blue-900/40 to-blue-800/30 p-4 backdrop-blur-sm">
+                  <p className="text-sm text-blue-300 font-medium">Тип чрезвычайной ситуации</p>
+                  <p className="mt-1 text-xl font-bold text-blue-100">{typeMeta.name}</p>
+                  <p className="mt-2 text-xs text-blue-200 leading-relaxed">{typeMeta.description}</p>
                   {aiAnalysis.warning && (
-                    <p className="mt-3 text-xs font-semibold text-red-600" title="Предупреждение модели">
+                    <p className="mt-3 text-xs font-semibold text-red-400 bg-red-950/40 px-2 py-1 rounded" title="Предупреждение">
                       ⚠️ {aiAnalysis.warning}
                     </p>
                   )}
                 </div>
 
-                <div className={`rounded-2xl p-4 ${severityStyles.bannerClass}`}>
+                <div className={`rounded-2xl p-4 border border-slate-600 backdrop-blur-sm ${severityStyles.bannerClass}`}>
                   <p className="text-sm font-medium">Тяжесть последствий</p>
                   <p className="mt-1 text-xl font-bold flex items-center gap-2">
                     <span>{severityStyles.icon}</span>
@@ -1829,25 +1841,25 @@ ${voiceTranscription}`
               </div>
 
               {/* Risk Assessment */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="bg-gradient-to-br from-yellow-900/30 to-amber-900/20 border border-yellow-700/50 rounded-lg p-4 mb-4">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="font-semibold text-yellow-900 mb-1">Оценка рисков</p>
-                    <p className="text-sm text-yellow-800">
+                    <p className="font-semibold text-yellow-200 mb-1">Оценка рисков</p>
+                    <p className="text-sm text-yellow-100">
                       {aiAnalysis.risk_assessment || 'Требуется уточнение'}
                     </p>
 
                     {aiAnalysis.notes && (
-                      <p className="mt-3 text-xs text-yellow-700">{aiAnalysis.notes}</p>
+                      <p className="mt-3 text-xs text-yellow-200/80">{aiAnalysis.notes}</p>
                     )}
 
                     {aiAnalysis.error && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                        <p className="text-xs font-semibold text-red-800 mb-1">⚠️ Ошибка AI анализа</p>
-                        <p className="text-xs text-red-700">{aiAnalysis.error}</p>
-                        <p className="text-xs text-red-600 mt-2">
-                          Возможные причины: недоступность сервиса Яндекс GPT, исчерпанная квота или временная сетевая проблема.
+                      <div className="mt-3 p-3 bg-red-950/50 border border-red-800 rounded">
+                        <p className="text-xs font-semibold text-red-300 mb-1">⚠️ Ошибка анализа</p>
+                        <p className="text-xs text-red-200">{aiAnalysis.error}</p>
+                        <p className="text-xs text-red-300/80 mt-2">
+                          Возможные причины: временная сетевая проблема или недоступность сервиса.
                           Вызов успешно отправлен, но рекомендации могли быть неполными.
                         </p>
                       </div>
@@ -1856,39 +1868,65 @@ ${voiceTranscription}`
                 </div>
               </div>
 
-              {/* Immediate Actions */}
+              {/* Immediate Actions - Enhanced */}
               {aiAnalysis.immediate_actions && aiAnalysis.immediate_actions.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-red-600">⚡</span>
-                    Немедленные действия
-                  </h3>
-                  <ul className="space-y-2">
+                <div className="mb-4 relative overflow-hidden bg-gradient-to-br from-red-900/40 to-orange-900/30 border-2 border-red-600/50 rounded-xl p-5 shadow-xl">
+                  {/* Urgency indicator */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500 animate-pulse"></div>
+                  
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-red-500/20 p-2 rounded-lg">
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-red-200 text-xl">Немедленные действия</h3>
+                      <p className="text-xs text-red-300/80">Выполните в указанном порядке</p>
+                    </div>
+                  </div>
+                  
+                  <ul className="space-y-3">
                     {aiAnalysis.immediate_actions.map((action, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <span className="text-red-600 font-bold">{index + 1}.</span>
-                        <span className="text-gray-700">{action}</span>
+                      <li key={index} className="flex items-start gap-3 bg-slate-900/60 p-4 rounded-lg border border-red-800/30 hover:border-red-700/50 transition-all group">
+                        <div className="flex-shrink-0 w-8 h-8 bg-red-600 text-white font-bold rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+                          {index + 1}
+                        </div>
+                        <span className="text-slate-100 text-base leading-relaxed">{action}</span>
                       </li>
                     ))}
                   </ul>
+                  
+                  <div className="mt-4 p-3 bg-red-950/50 rounded-lg border border-red-800/30">
+                    <p className="text-xs text-red-200 flex items-center gap-2">
+                      <span>⏱️</span>
+                      <span className="font-semibold">Время критично!</span> 
+                      <span>Действуйте быстро и решительно</span>
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Required Resources */}
+              {/* Required Resources - Enhanced */}
               {aiAnalysis.required_resources && aiAnalysis.required_resources.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-blue-600">🚒</span>
-                    Необходимые ресурсы
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
+                <div className="mb-4 bg-gradient-to-br from-blue-900/40 to-cyan-900/30 border border-blue-600/50 rounded-xl p-5 shadow-lg">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-blue-500/20 p-2 rounded-lg">
+                      <span className="text-2xl">🚒</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-blue-200 text-xl">Задействованные службы</h3>
+                      <p className="text-xs text-blue-300/80">Следующие ресурсы направлены на место происшествия</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {aiAnalysis.required_resources.map((resource, index) => (
-                      <span
+                      <div
                         key={index}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                        className="flex items-center gap-3 px-4 py-3 bg-blue-950/50 border border-blue-700/40 rounded-lg hover:border-blue-600/60 transition-all group"
                       >
-                        {resource}
-                      </span>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:animate-pulse"></div>
+                        <span className="text-blue-100 font-medium text-sm">{resource}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1896,9 +1934,9 @@ ${voiceTranscription}`
 
               {/* Estimated Victims */}
               {aiAnalysis.estimated_victims !== null && (
-                <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <p className="text-sm text-purple-600 font-medium">Пострадавшие</p>
-                  <p className="text-xl font-bold text-purple-700">
+                <div className="mb-4 bg-gradient-to-br from-purple-900/30 to-pink-900/20 border border-purple-700/50 rounded-lg p-4">
+                  <p className="text-sm text-purple-300 font-medium">Пострадавшие</p>
+                  <p className="text-xl font-bold text-purple-100">
                     Примерно {aiAnalysis.estimated_victims} человек(а)
                   </p>
                 </div>
@@ -1906,13 +1944,13 @@ ${voiceTranscription}`
 
               {/* Keywords */}
               {aiAnalysis.keywords && aiAnalysis.keywords.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 text-sm">Ключевые слова</h3>
+                <div className="mb-4 bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-slate-200 mb-2 text-sm">Ключевые слова</h3>
                   <div className="flex flex-wrap gap-2">
                     {aiAnalysis.keywords.map((keyword, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                        className="px-3 py-1 bg-slate-700/50 text-slate-300 border border-slate-600 rounded-lg text-xs"
                       >
                         #{keyword}
                       </span>
@@ -1923,47 +1961,68 @@ ${voiceTranscription}`
 
               {/* Location Hints */}
               {aiAnalysis.location_hints && aiAnalysis.location_hints.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-green-600" />
+                <div className="mb-6 bg-gradient-to-br from-green-900/30 to-emerald-900/20 border border-green-700/50 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-300 mb-2 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-400" />
                     Подсказки по местоположению
                   </h3>
                   <ul className="space-y-1">
                     {aiAnalysis.location_hints.map((hint, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="text-green-600">•</span>
+                      <li key={index} className="text-sm text-green-200 flex items-start gap-2">
+                        <span className="text-green-400">•</span>
                         <span>{hint}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
+              </div>
 
-              {/* Close Button */}
+              {/* Close Button - Enhanced */}
+              <div className="p-5 sm:p-6 bg-gradient-to-b from-slate-900/50 to-slate-950 border-t border-slate-700">
               <button
                 onClick={() => setShowAIModal(false)}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                className="group relative w-full px-8 py-4 bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 text-white rounded-xl hover:from-orange-700 hover:via-red-700 hover:to-rose-700 transition-all font-bold text-lg shadow-2xl hover:shadow-orange-900/50 hover:scale-[1.02] active:scale-[0.98]"
               >
-                Понятно
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Понятно, я ознакомлен
+                </span>
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
               </button>
+
+              {/* Emergency Numbers Quick Reference */}
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <div className="bg-red-950/50 border border-red-800/30 rounded-lg p-2">
+                  <p className="text-xs text-red-300">Пожарная</p>
+                  <p className="text-lg font-bold text-red-200">101</p>
+                </div>
+                <div className="bg-blue-950/50 border border-blue-800/30 rounded-lg p-2">
+                  <p className="text-xs text-blue-300">Полиция</p>
+                  <p className="text-lg font-bold text-blue-200">102</p>
+                </div>
+                <div className="bg-green-950/50 border border-green-800/30 rounded-lg p-2">
+                  <p className="text-xs text-green-300">Скорая</p>
+                  <p className="text-lg font-bold text-green-200">103</p>
+                </div>
+              </div>
 
               {/* Debug Info */}
               <details className="mt-4 text-xs">
-                <summary className="cursor-pointer text-gray-500 hover:text-gray-700">
-                  🐛 Debug: Показать полные данные AI
+                <summary className="cursor-pointer text-slate-400 hover:text-slate-300 flex items-center gap-2">
+                  <span>🐛</span>
+                  <span>Debug: Показать полные данные</span>
                 </summary>
-                <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-60">
+                <pre className="mt-2 p-3 bg-slate-950 border border-slate-800 rounded text-xs overflow-auto max-h-60 text-slate-300">
                   {JSON.stringify(aiAnalysis, null, 2)}
                 </pre>
               </details>
-
-              <p className="text-xs text-center text-gray-500 mt-4">
-                Анализ выполнен с помощью {providerLabel}
-              </p>
+              </div>
             </div>
           </div>
         )
-      })()}
+      })())}
     </>
   )
 }

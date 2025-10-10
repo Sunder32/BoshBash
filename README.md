@@ -117,13 +117,10 @@ Svo/
 
 ```env
 DATABASE_URL=sqlite:///./rescue.db
-OPENAI_API_KEY=47d22a91-9b0f-412b-a3ed-b93f522f6b6b
 DEFAULT_LOCATION_LAT=56.8587  # Тверь
 DEFAULT_LOCATION_LON=35.9176
 SECRET_KEY=your-super-secret-key-change-in-production-min-32-chars-long-for-jwt-security
-YANDEX_GPT_API_KEY=<ваш_секретный_api_key>
-YANDEX_GPT_FOLDER_ID=<ваш_folder_id>
-YANDEX_GPT_MODEL=yandexgpt-lite
+MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 ```
 
 ### Frontend (.env)
