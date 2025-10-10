@@ -182,7 +182,7 @@ export default function CitizenDashboard() {
                 <div className="space-y-4 max-w-xl">
                   <p className="section-title text-white/60">Экстренный вызов</p>
                   <h2 className="text-3xl lg:text-4xl font-semibold leading-tight text-white">
-                    Нажмите SOS, чтобы скоординировать спасателей и получить инструкции ИИ
+                    Нажмите SOS, чтобы скоординировать спасателей и получить советы
                   </h2>
                   <p className="text-sm sm:text-base text-white/70 leading-relaxed max-w-2xl">
                     Мы автоматически определим ваше местоположение, оценим приоритет инцидента и передадим данные ближайшим службам.
@@ -191,10 +191,10 @@ export default function CitizenDashboard() {
                 <div className="rounded-2xl bg-white/10 border border-white/20 px-4 py-3 text-sm text-white/80 shadow-lg shadow-rose-200/20">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-amber-200" />
-                    ИИ-оценка готова
+                    Автоматическая оценка готова
                   </div>
                   <p className="mt-2 text-xs text-white/60">
-                    Модель посчитает приоритет и рекомендуемые ресурсы через 3 секунды после отправки
+                    Система определит приоритет и рекомендуемые ресурсы через 3 секунды после отправки
                   </p>
                 </div>
               </div>
@@ -362,17 +362,17 @@ export default function CitizenDashboard() {
               <h4 className="text-lg font-semibold">Связь с экстренными службами</h4>
             </div>
             <p className="text-sm text-slate-600">
-              Платформа гарантирует резервирование каналов и автоматическую передачу данных диспетчеру, включая AI-анализ обращения.
+              Платформа гарантирует резервирование каналов и автоматическую передачу данных диспетчеру, включая анализ обращения по ключевым словам.
             </p>
           </div>
 
           <div className="card-modern bg-gradient-to-br from-rose-500/80 via-red-500/70 to-amber-400/80 text-white p-6 space-y-3">
             <div className="flex items-center gap-3">
               <Sparkles className="w-5 h-5" />
-              <h4 className="text-lg font-semibold">ИИ контроль качества</h4>
+              <h4 className="text-lg font-semibold">Контроль качества</h4>
             </div>
             <p className="text-sm text-white/90">
-              Любой сигнал проходит машинный анализ: определяется тип инцидента, приоритет и рекомендуемые ресурсы до передачи в штаб.
+              Любой сигнал проходит автоматический анализ: определяется тип инцидента, приоритет и рекомендуемые ресурсы до передачи в штаб.
             </p>
           </div>
         </div>

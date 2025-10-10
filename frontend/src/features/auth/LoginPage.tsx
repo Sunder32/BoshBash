@@ -54,7 +54,7 @@ export default function LoginPage() {
                     Экосистема спасательных операций следующего поколения
                   </h1>
                   <p className="text-base sm:text-lg text-slate-100/80 max-w-xl leading-relaxed">
-                    Отправляйте SOS, отслеживайте статус спасателей и получайте рекомендации ИИ в едином интерфейсе.
+                    Отправляйте SOS, отслеживайте статус спасателей и получайте советы в едином интерфейсе.
                     Всё защищено, быстро и доступно 24/7.
                   </p>
                 </div>
@@ -180,7 +180,7 @@ export default function LoginPage() {
                     </div>
                     <div className="flex items-center gap-3 text-sm text-slate-500">
                       <Sparkles className="w-4 h-4 text-amber-500" />
-                      <span>ИИ-помощник анализирует сообщения в режиме реального времени</span>
+                      <span>Система автоматически анализирует сообщения по ключевым словам</span>
                     </div>
                   </div>
                 </div>
