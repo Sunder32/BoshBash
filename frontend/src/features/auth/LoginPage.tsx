@@ -91,6 +91,7 @@ export default function LoginPage() {
                   </p>
                 </div>
 
+                <div className="flex-1 flex flex-col justify-center">
                   {error && (
                     <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 animate-fade-in">
                       <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -98,7 +99,6 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                <div className="flex-1 flex items-center">
                   <form onSubmit={handleSubmit} className="space-y-6 w-full">
                     <div className="space-y-2">
                       <label htmlFor="email" className="block text-sm font-semibold text-white drop-shadow">

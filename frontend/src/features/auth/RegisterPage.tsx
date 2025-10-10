@@ -65,98 +65,98 @@ export default function RegisterPage() {
             </p>
           </div>
 
-        {error && (
-          <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 animate-fade-in">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm font-medium">{error}</span>
-          </div>
-        )}
+          {error && (
+            <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 animate-fade-in">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium">{error}</span>
+            </div>
+          )}
 
-  <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="register-email" className="block text-sm font-semibold text-white drop-shadow mb-2">
-              Email *
-            </label>
-            <input
-              id="register-email"
-              type="email"
-              required
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange('email')}
-              className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-              placeholder="name@example.com"
-              aria-required="true"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="register-email" className="block text-sm font-semibold text-white drop-shadow mb-2">
+                Email *
+              </label>
+              <input
+                id="register-email"
+                type="email"
+                required
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange('email')}
+                className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                placeholder="name@example.com"
+                aria-required="true"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="register-full-name" className="block text-sm font-semibold text-white drop-shadow mb-2">
-              Полное имя
-            </label>
-            <input
-              id="register-full-name"
-              type="text"
-              value={formData.full_name}
-              onChange={handleChange('full_name')}
-              className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-              placeholder="Иван Иванов"
-              autoComplete="name"
-            />
-          </div>
+            <div>
+              <label htmlFor="register-full-name" className="block text-sm font-semibold text-white drop-shadow mb-2">
+                Полное имя
+              </label>
+              <input
+                id="register-full-name"
+                type="text"
+                value={formData.full_name}
+                onChange={handleChange('full_name')}
+                className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                placeholder="Иван Иванов"
+                autoComplete="name"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="register-phone" className="block text-sm font-semibold text-white drop-shadow mb-2">
-              Телефон
-            </label>
-            <input
-              id="register-phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange('phone')}
-              className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-              placeholder="+7 (999) 999-99-99"
-              autoComplete="tel"
-            />
-          </div>
+            <div>
+              <label htmlFor="register-phone" className="block text-sm font-semibold text-white drop-shadow mb-2">
+                Телефон
+              </label>
+              <input
+                id="register-phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange('phone')}
+                className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                placeholder="+7 (999) 999-99-99"
+                autoComplete="tel"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="register-password" className="block text-sm font-semibold text-white drop-shadow mb-2">
-              Пароль * (8-72 символа)
-            </label>
-            <input
-              id="register-password"
-              type="password"
-              required
-              minLength={8}
-              maxLength={72}
-              value={formData.password}
-              onChange={handleChange('password')}
-              className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-              placeholder="Введите надёжный пароль"
-              autoComplete="new-password"
-              aria-required="true"
-            />
-          </div>
+            <div>
+              <label htmlFor="register-password" className="block text-sm font-semibold text-white drop-shadow mb-2">
+                Пароль * (8-72 символа)
+              </label>
+              <input
+                id="register-password"
+                type="password"
+                required
+                minLength={8}
+                maxLength={72}
+                value={formData.password}
+                onChange={handleChange('password')}
+                className="w-full px-4 py-3 rounded-xl bg-transparent backdrop-blur-md border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                placeholder="Введите надёжный пароль"
+                autoComplete="new-password"
+                aria-required="true"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn-primary w-full text-base disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Регистрация...
-              </span>
-            ) : (
-              'Зарегистрироваться'
-            )}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary w-full text-base disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Регистрация...
+                </span>
+              ) : (
+                'Зарегистрироваться'
+              )}
+            </button>
+          </form>
 
         <div className="mt-8 text-center text-sm text-white/95">
           Уже есть аккаунт?{' '}
