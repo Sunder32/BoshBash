@@ -31,12 +31,12 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="aurora-wrapper rounded-[3rem] bg-slate-900/40 border border-white/10 shadow-[0_40px_80px_-45px_rgba(15,23,42,0.9)]">
-          <div className="absolute inset-0 overflow-hidden rounded-[3rem]">
+          <div className="absolute inset-0 overflow-hidden rounded-[3rem] pointer-events-none z-0">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br from-amber-400/40 via-rose-500/30 to-purple-500/40 blur-[120px]" />
             <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-gradient-to-tr from-blue-500/30 via-sky-400/20 to-rose-400/40 blur-[140px]" />
           </div>
 
-          <div className="relative grid gap-12 lg:grid-cols-[1.05fr_0.95fr] p-6 sm:p-12">
+          <div className="relative z-10 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] p-6 sm:p-12">
             {/* Hero Section */}
             <div className="flex flex-col justify-between">
               <div className="space-y-8">
