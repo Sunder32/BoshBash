@@ -191,7 +191,13 @@ export default function OperatorDashboard() {
     if (diff < 1) return 'Только что'
     if (diff < 60) return `${diff} мин назад`
     if (diff < 1440) return `${Math.floor(diff / 60)} ч назад`
-    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleDateString('ru-RU', { 
+      day: '2-digit', 
+      month: 'short', 
+      hour: '2-digit', 
+      minute: '2-digit',
+      timeZone: 'Europe/Moscow'  // Московское время (МСК)
+    })
   }
 
   const statusEntries = stats ? Object.entries(stats.by_status || {}) : []

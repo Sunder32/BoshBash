@@ -136,7 +136,8 @@ const formatTime = (date: string) => {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: 'Europe/Moscow',  // Московское время (МСК)
   })
 }
 

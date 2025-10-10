@@ -108,7 +108,8 @@ function formatDate(value?: string) {
   return new Date(value).toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'Europe/Moscow'  // Московское время (МСК)
   })
 }
 
@@ -118,7 +119,8 @@ function formatDateTime(value?: string) {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: 'Europe/Moscow'  // Московское время (МСК)
   })
 }
 
