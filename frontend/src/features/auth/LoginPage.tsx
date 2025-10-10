@@ -39,49 +39,49 @@ export default function LoginPage() {
           <div className="relative grid gap-12 lg:grid-cols-[1.05fr_0.95fr] p-6 sm:p-12">
             {/* Hero Section */}
             <div className="flex flex-col justify-between">
-              <div className="space-y-10">
+              <div className="space-y-8">
                 <div className="inline-flex items-center gap-3 bg-white/10 border border-white/20 px-4 py-2 rounded-full text-sm font-medium uppercase tracking-[0.3em] text-white/80 w-fit shadow-lg">
                   <Sparkles className="w-4 h-4" />
                   Rescue Operations Cloud
                 </div>
 
                 <div className="space-y-5">
-                  <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.25rem] bg-white text-5xl shadow-[0_20px_60px_rgba(255,255,255,0.35)]">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white text-4xl shadow-[0_20px_60px_rgba(255,255,255,0.35)]">
                     🚨
                   </div>
-                  <h1 className="text-4xl sm:text-5xl xl:text-[3.5rem] font-semibold leading-tight text-white drop-shadow-2xl">
+                  <h1 className="text-3xl sm:text-4xl xl:text-5xl font-semibold leading-tight text-white drop-shadow-2xl">
                     Экосистема спасательных операций следующего поколения
                   </h1>
-                  <p className="text-base sm:text-lg text-slate-100/80 max-w-xl leading-relaxed">
+                  <p className="text-sm sm:text-base text-slate-100/80 max-w-xl leading-relaxed">
                     Отправляйте SOS, отслеживайте статус спасателей и получайте советы в едином интерфейсе.
                     Всё защищено, быстро и доступно 24/7.
                   </p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="glass-card-dark rounded-2xl p-5 border border-white/10 shadow-xl">
-                    <Shield className="w-7 h-7 text-emerald-300 mb-3" />
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">Безопасность</p>
-                    <p className="text-lg font-semibold">ISO/IEC 27001</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="glass-card-dark rounded-xl p-4 border border-white/10 shadow-xl">
+                    <Shield className="w-6 h-6 text-emerald-300 mb-2" />
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Безопасность</p>
+                    <p className="text-base font-semibold">ISO/IEC 27001</p>
                   </div>
-                  <div className="glass-card-dark rounded-2xl p-5 border border-white/10 shadow-xl">
-                    <Zap className="w-7 h-7 text-amber-300 mb-3" />
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">Скорость</p>
-                    <p className="text-lg font-semibold">до 1.2 сек</p>
+                  <div className="glass-card-dark rounded-xl p-4 border border-white/10 shadow-xl">
+                    <Zap className="w-6 h-6 text-amber-300 mb-2" />
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Скорость</p>
+                    <p className="text-base font-semibold">до 1.2 сек</p>
                   </div>
-                  <div className="glass-card-dark rounded-2xl p-5 border border-white/10 shadow-xl">
-                    <Users className="w-7 h-7 text-sky-300 mb-3" />
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">Надёжность</p>
-                    <p className="text-lg font-semibold">24/7/365</p>
+                  <div className="glass-card-dark rounded-xl p-4 border border-white/10 shadow-xl">
+                    <Users className="w-6 h-6 text-sky-300 mb-2" />
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Надёжность</p>
+                    <p className="text-base font-semibold">24/7/365</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Login Side */}
-            <div className="relative">
-              <div className="p-8 sm:p-10 backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/20 shadow-2xl">
-                <div className="mb-8">
+            <div className="relative flex">
+              <div className="p-8 sm:p-10 backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/20 shadow-2xl flex flex-col h-full w-full min-h-[600px]">
+                <div>
                   <p className="section-title text-white/90">Войти в систему</p>
                   <h2 className="mt-3 text-2xl sm:text-3xl font-semibold text-white drop-shadow-lg">
                     Управление инцидентами и аналитика в одном окне
@@ -98,7 +98,8 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex-1 flex items-center">
+                  <form onSubmit={handleSubmit} className="space-y-6 w-full">
                     <div className="space-y-2">
                       <label htmlFor="email" className="block text-sm font-semibold text-white drop-shadow">
                         Email адрес
@@ -149,28 +150,18 @@ export default function LoginPage() {
                       )}
                     </button>
                   </form>
-
-                  <div className="mt-8 text-center text-sm text-white/95">
-                    Нет аккаунта?{' '}
-                    <Link
-                      to="/register"
-                      className="text-amber-300 hover:text-amber-200 font-semibold transition-colors underline decoration-2 underline-offset-2"
-                    >
-                      Зарегистрироваться
-                    </Link>
-                  </div>
-
-                  <div className="mt-10 grid gap-3 bg-transparent backdrop-blur-md border border-white/20 rounded-2xl p-5 shadow-lg">
-                    <div className="flex items-center gap-3 text-sm text-white/95">
-                      <Shield className="w-4 h-4 text-emerald-300" />
-                      <span>Шифрование TLS 1.3 и контроль доступа по ролям</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-white/95">
-                      <Sparkles className="w-4 h-4 text-amber-300" />
-                      <span>Система автоматически анализирует сообщения по ключевым словам</span>
-                    </div>
-                  </div>
                 </div>
+
+                <div className="pt-6 text-center text-sm text-white/95">
+                  Нет аккаунта?{' '}
+                  <Link
+                    to="/register"
+                    className="text-amber-300 hover:text-amber-200 font-semibold transition-colors underline decoration-2 underline-offset-2"
+                  >
+                    Зарегистрироваться
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
