@@ -1,7 +1,7 @@
 """
 SOS Alert schemas
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import Optional, List
 from datetime import datetime
 from uuid import UUID
@@ -42,7 +42,7 @@ class SOSAlertResponse(SOSAlertBase):
     priority: int
     address: Optional[str]
     media_urls: Optional[List[str]]
-    ai_analysis: Optional[dict]
+    ai_analysis: Optional[dict] = None  # Анализ на основе ключевых слов (advice)
     assigned_to: Optional[UUID]
     team_id: Optional[UUID]
     assigned_to_name: Optional[str] = None  # Имя спасателя

@@ -73,7 +73,7 @@ export interface SOSAlert {
   title?: string
   description?: string
   media_urls?: string[]
-  keyword_analysis?: any  // Анализ на основе ключевых слов
+  ai_analysis?: any  // Анализ на основе ключевых слов (advice)
   assigned_to?: string
   team_id?: string
   assigned_to_name?: string  // Имя спасателя
