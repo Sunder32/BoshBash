@@ -125,7 +125,9 @@ const TAB_CONFIG: TabConfig[] = [
 ]
 
 const formatTime = (date: string) => {
-  const d = new Date(date)
+  // Сервер отдает время в UTC, конвертируем в МСК (UTC+3)
+  const utcDate = new Date(date + (date.includes('Z') ? '' : 'Z'))
+  const d = new Date(utcDate)
   const now = new Date()
   const diff = Math.floor((now.getTime() - d.getTime()) / 60000)
 

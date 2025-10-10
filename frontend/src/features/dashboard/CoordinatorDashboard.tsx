@@ -792,7 +792,7 @@ export default function CoordinatorDashboard() {
                   <p className="text-slate-400 text-sm mb-1">Дата создания</p>
                   <p className="text-white font-medium">
                     {selectedTeam.created_at 
-                      ? new Date(selectedTeam.created_at).toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' })
+                      ? new Date(selectedTeam.created_at + (selectedTeam.created_at.includes('Z') ? '' : 'Z')).toLocaleDateString('ru-RU', { timeZone: 'Europe/Moscow' })
                       : 'Неизвестно'
                     }
                   </p>

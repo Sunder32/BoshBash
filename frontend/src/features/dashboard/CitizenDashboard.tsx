@@ -71,7 +71,9 @@ const getTypeIcon = (type: string) => {
 }
 
 const formatTime = (date: string) => {
-  return new Date(date).toLocaleString('ru-RU', {
+  // Сервер отдает время в UTC, конвертируем в МСК (UTC+3)
+  const utcDate = new Date(date + (date.includes('Z') ? '' : 'Z')) // Добавляем Z если его нет
+  return utcDate.toLocaleString('ru-RU', {
     day: '2-digit',
     month: 'long',
     hour: '2-digit',

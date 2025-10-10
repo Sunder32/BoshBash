@@ -105,7 +105,9 @@ const TYPE_LABELS: Record<EmergencyType, string> = {
 
 function formatDate(value?: string) {
   if (!value) return '—'
-  return new Date(value).toLocaleDateString('ru-RU', {
+  // Сервер отдает время в UTC, добавляем Z если его нет
+  const utcDate = new Date(value + (value.includes('Z') ? '' : 'Z'))
+  return utcDate.toLocaleDateString('ru-RU', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -115,7 +117,9 @@ function formatDate(value?: string) {
 
 function formatDateTime(value?: string) {
   if (!value) return '—'
-  return new Date(value).toLocaleString('ru-RU', {
+  // Сервер отдает время в UTC, добавляем Z если его нет
+  const utcDate = new Date(value + (value.includes('Z') ? '' : 'Z'))
+  return utcDate.toLocaleString('ru-RU', {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
