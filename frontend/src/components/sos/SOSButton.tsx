@@ -245,7 +245,6 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
   const [description, setDescription] = useState('')
   const [title, setTitle] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [manualLatitude, setManualLatitude] = useState('')
   const [manualLongitude, setManualLongitude] = useState('')
@@ -906,64 +905,6 @@ ${voiceTranscription}`
     await getLocation()
   }
 
-  const analyzeWithAI = async () => {
-    if (!description || description.length < 10) {
-      setError('Пожалуйста, добавьте более подробное описание для анализа')
-      return
-    }
-
-    setIsAnalyzing(true)
-    setError(null)
-
-    try {
-      const response = await api.post('/api/v1/advice/analyze', {
-        description: description
-      })
-
-      console.log('🤖 Advice Response:', response.data)
-
-      if (response.data) {
-        const analysis = response.data
-        console.log('📊 Analysis:', analysis)
-        console.log('🎯 Confidence:', analysis.confidence)
-        console.log('⚡ Immediate Actions:', analysis.immediate_actions)
-        console.log('📋 Severity:', analysis.severity)
-        
-        // Нормализация структуры для совместимости с интерфейсом AIAnalysis
-        const normalizedAnalysis: AIAnalysis = {
-          type: analysis.detected_type || analysis.emergency_type || 'general',
-          type_name: analysis.type_name,
-          priority: analysis.priority || 3,
-          severity: analysis.severity || 'medium',
-          keywords: analysis.matched_keywords || [],
-          confidence: analysis.confidence || 0.5,
-          estimated_victims: null,
-          location_hints: [],
-          required_resources: analysis.required_resources || [],
-          immediate_actions: analysis.immediate_actions || [],
-          risk_assessment: analysis.warning || `Уровень опасности: ${analysis.severity}`,
-          warning: analysis.warning,
-          notes: analysis.secondary_types?.length > 0 
-            ? `Возможно также: ${analysis.secondary_types.join(', ')}` 
-            : null,
-          model_used: analysis.method || 'keyword_matching'
-        }
-        
-        setAiAnalysis(normalizedAnalysis)
-        setShowAIModal(true)
-        
-        if (analysis.detected_type) {
-          setEmergencyType(analysis.detected_type as EmergencyType)
-        }
-      }
-    } catch (err: any) {
-      console.error('Analysis failed:', err)
-      setError('Не удалось выполнить анализ. Продолжаем без рекомендаций.')
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
   const handleSubmitEmergency = async () => {
     let finalLatitude: number | null = hasCoordinates ? latitude! : null
     let finalLongitude: number | null = hasCoordinates ? longitude! : null
@@ -1004,25 +945,61 @@ ${voiceTranscription}`
         description: description || 'Требуется помощь',
       })
 
+      setIsEmergency(true)
+      setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
+      
+      // Показываем рекомендации, если есть описание
       if (description && description.length >= 10) {
-        await analyzeWithAI()
+        try {
+          const response = await api.post('/api/v1/advice/analyze', {
+            description: description
+          })
+
+          if (response.data) {
+            const analysis = response.data
+            
+            // Нормализация структуры для совместимости с интерфейсом AIAnalysis
+            const normalizedAnalysis: AIAnalysis = {
+              type: analysis.detected_type || analysis.emergency_type || 'general',
+              type_name: analysis.type_name,
+              priority: analysis.priority || 3,
+              severity: analysis.severity || 'medium',
+              keywords: analysis.matched_keywords || [],
+              confidence: analysis.confidence || 0.5,
+              estimated_victims: null,
+              location_hints: [],
+              required_resources: analysis.required_resources || [],
+              immediate_actions: analysis.immediate_actions || [],
+              risk_assessment: analysis.warning || `Уровень опасности: ${analysis.severity}`,
+              warning: analysis.warning,
+              notes: analysis.secondary_types?.length > 0 
+                ? `Возможно также: ${analysis.secondary_types.join(', ')}` 
+                : null,
+              model_used: analysis.method || 'keyword_matching'
+            }
+            
+            setAiAnalysis(normalizedAnalysis)
+            setShowAIModal(true)
+          }
+        } catch (err: any) {
+          console.error('Analysis failed:', err)
+        }
+      } else {
+        // Если нет описания, просто закрываем форму через 4 секунды
+        setTimeout(() => {
+          handleClose()
+        }, 4000)
       }
 
-      setIsEmergency(true)
       setDescription('')
       setTitle('')
       setManualLatitude('')
       setManualLongitude('')
       setUseManualLocation(false)
-      setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
       
       setTimeout(() => {
         setIsEmergency(false)
       }, 5000)
-
-      setTimeout(() => {
-        handleClose()
-      }, 4000)
     } catch (err: any) {
       console.error('Failed to create SOS alert:', err)
       setError(err.response?.data?.detail || 'Не удалось отправить сигнал SOS')
@@ -1680,18 +1657,13 @@ ${voiceTranscription}`
                   <button
                     type="button"
                     onClick={handleSubmitEmergency}
-                    disabled={isSubmitting || isAnalyzing}
+                    disabled={isSubmitting}
                     className="btn-primary flex-1"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
                         <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         Отправка...
-                      </span>
-                    ) : isAnalyzing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Sparkles className="h-5 w-5 animate-pulse" />
-                        Анализ...
                       </span>
                     ) : (
                       '🚨 Отправить SOS'
