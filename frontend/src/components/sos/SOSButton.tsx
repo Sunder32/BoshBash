@@ -949,14 +949,20 @@ ${voiceTranscription}`
       setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
       
       // Показываем рекомендации, если есть описание
-      console.log('📝 Description:', description)
-      console.log('📏 Description length:', description?.length)
+      const currentDescription = description
+      console.log('📝 Description:', currentDescription)
+      console.log('📏 Description length:', currentDescription?.length)
+      console.log('📋 Current state:', { 
+        emergencyType, 
+        hasCoordinates,
+        title: title || 'default'
+      })
       
-      if (description && description.length >= 10) {
+      if (currentDescription && currentDescription.length >= 10) {
         console.log('🔄 Starting advice analysis...')
         try {
           const response = await api.post('/api/v1/advice/analyze', {
-            description: description
+            description: currentDescription
           })
 
           console.log('✅ Advice response received:', response.data)
@@ -988,6 +994,14 @@ ${voiceTranscription}`
             setAiAnalysis(normalizedAnalysis)
             console.log('🎯 Setting showAIModal to true')
             setShowAIModal(true)
+            
+            // Проверка через небольшую задержку
+            setTimeout(() => {
+              console.log('🔍 Modal state check:', {
+                showAIModal: true,
+                hasAnalysis: !!normalizedAnalysis
+              })
+            }, 100)
           }
         } catch (err: any) {
           console.error('❌ Analysis failed:', err)
@@ -1698,6 +1712,7 @@ ${voiceTranscription}`
 
       {/* Advice Modal */}
       {showAIModal && aiAnalysis && ((() => {
+        console.log('🎨 Rendering Advice Modal:', { showAIModal, hasAnalysis: !!aiAnalysis })
         const providerLabel = resolveProviderLabel(aiAnalysis)
         const priorityMeta = getPriorityMeta(aiAnalysis)
         const severityMeta = getSeverityMeta(aiAnalysis)
