@@ -1,0 +1,33 @@
+# Gradle Properties для SOS Rescue App
+# Скопируйте этот файл в gradle.properties и настройте под ваш сервер
+
+# Основной URL API (Production)
+API_BASE_URL=https://bashbosh.ru
+WS_BASE_URL=wss://bashbosh.ru
+
+# Резервный URL (для локальной разработки)
+API_FALLBACK_URL=http://10.0.2.2:8000
+WS_FALLBACK_URL=ws://10.0.2.2:8000
+
+# Версия приложения
+VERSION_NAME=2.0.0
+VERSION_CODE=20
+
+# Настройки подписи Release APK (заполните для production build)
+# RELEASE_STORE_FILE=path/to/your/keystore.jks
+# RELEASE_STORE_PASSWORD=your_store_password
+# RELEASE_KEY_ALIAS=your_key_alias
+# RELEASE_KEY_PASSWORD=your_key_password
+
+# Android Gradle Plugin настройки
+android.useAndroidX=true
+android.enableJetifier=true
+
+# Kotlin
+kotlin.code.style=official
+
+# Оптимизация сборки
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.configureondemand=true
