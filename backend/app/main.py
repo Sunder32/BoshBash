@@ -11,7 +11,7 @@ import os
 
 from app.core.config import settings
 from app.core.database import sync_engine, Base
-from app.api.v1 import auth, sos, users, geolocation, teams, notifications, analytics, websocket, ai, downloads
+from app.api.v1 import auth, sos, users, geolocation, teams, notifications, analytics, websocket, advice, downloads
 from app.middleware.error_handler import error_handler_middleware
 
 
@@ -57,7 +57,7 @@ app.include_router(teams.router, prefix="/api/v1/teams", tags=["Rescue Teams"])
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["WebSocket"])
-app.include_router(ai.router, prefix="/api/v1/advice", tags=["Emergency Advice"])
+app.include_router(advice.router, prefix="/api/v1/advice", tags=["Emergency Advice"])
 app.include_router(downloads.router, prefix="/api/v1/downloads", tags=["Downloads"])
 
 

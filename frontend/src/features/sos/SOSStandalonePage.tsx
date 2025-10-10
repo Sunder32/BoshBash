@@ -42,7 +42,7 @@ export default function SOSStandalonePage() {
             <div className="grid gap-4 sm:grid-cols-3 text-sm text-white/70">
               <div className="flex items-center gap-3">
                 <Sparkles className="h-5 w-5 text-amber-200" />
-                <span>ИИ определит приоритет и ресурсы через несколько секунд после отправки</span>
+                <span>Система автоматически определит тип ЧС и приоритет по ключевым словам</span>
               </div>
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-emerald-200" />
