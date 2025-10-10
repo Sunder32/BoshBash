@@ -12,6 +12,166 @@ class KeywordAdvisor:
     
     def __init__(self):
         self.keywords = self._load_keywords()
+        self.priority_keywords = self._load_priority_keywords()
+    
+    def _load_priority_keywords(self) -> Dict[int, List[str]]:
+        """Загрузка ключевых слов для определения приоритета"""
+        return {
+            1: [  # КРИТИЧЕСКИЙ - немедленная угроза жизни
+                # Смерть и критическое состояние
+                "умирает", "умер", "мертв", "труп", "не дышит", "остановилось сердце",
+                "клиническая смерть", "агония", "без сознания", "кома",
+                
+                # Массовые жертвы
+                "много пострадавших", "массовое", "десятки", "сотни", "толпа",
+                "давка", "паника", "множество жертв", "много погибших",
+                
+                # Взрывы и обрушения
+                "взрыв", "взорвалось", "обрушилось", "обвал", "завал", 
+                "под завалом", "придавило", "рухнуло", "здание рушится",
+                
+                # Пожар с угрозой жизни
+                "горим заживо", "заблокированы", "не можем выбраться", "задыхаемся",
+                "дым повсюду", "окружены огнем", "выхода нет", "заперты",
+                
+                # Сильное кровотечение
+                "фонтан крови", "артериальное", "истекает кровью", "много крови",
+                "не останавливается кровь", "алая кровь бьет", "потерял много крови",
+                
+                # Оружие и насилие
+                "стреляют", "стрельба", "автомат", "расстрел", "террор",
+                "заложники", "захват", "бомба", "террористы", "взрывчатка",
+                
+                # Утопление
+                "тонет человек", "ушел под воду", "не всплывает", "утонул",
+                
+                # Роды и беременность
+                "роды", "рожает", "отошли воды", "преждевременные роды",
+                "кровотечение при беременности",
+                
+                # Дети в опасности
+                "ребенок не дышит", "младенец задыхается", "ребенок тонет",
+                "украли ребенка", "ребенок пропал",
+            ],
+            
+            2: [  # ВЫСОКИЙ - серьезная угроза, требует быстрого реагирования
+                # Боль и травмы
+                "сильная боль", "невыносимая боль", "острая боль", "боль в сердце",
+                "боль в груди", "боль за грудиной",
+                
+                # Кровотечение
+                "кровотечение", "кровь течет", "порез", "глубокая рана",
+                "кровь не останавливается",
+                
+                # Переломы и травмы
+                "перелом", "сломал", "вывих", "сотрясение", "упал с высоты",
+                "сбила машина", "авария", "дтп",
+                
+                # Пожар
+                "пожар", "горит", "огонь", "дым", "задымление", "полыхает",
+                
+                # Сердце
+                "инфаркт", "сердечный приступ", "боль в сердце", "давит в груди",
+                
+                # Инсульт
+                "инсульт", "перекосило лицо", "паралич", "не говорит",
+                "не двигается", "онемела половина",
+                
+                # Нападение
+                "напали", "избили", "бьют", "грабят", "нож", "угрожают ножом",
+                "разбой", "грабеж", "насилие",
+                
+                # Аллергия
+                "анафилаксия", "отек квинке", "не может дышать", "распухло горло",
+                
+                # Передозировка
+                "передозировка", "наркотики", "отравился", "выпил яд",
+            ],
+            
+            3: [  # СРЕДНИЙ - требует помощи, но не критично
+                # Общая боль
+                "болит", "боль", "ноет", "колет", "тянет", "жжет",
+                
+                # Температура
+                "температура", "жар", "лихорадка", "озноб",
+                
+                # ЖКТ
+                "тошнит", "рвота", "понос", "отравление", "боль в животе",
+                
+                # Легкие травмы
+                "ушиб", "синяк", "царапина", "ссадина", "порезался",
+                
+                # Аллергия легкая
+                "аллергия", "сыпь", "зуд", "покраснение",
+                
+                # Кража без насилия
+                "украли", "кража", "пропал", "потерял",
+                
+                # Подозрительное
+                "подозрительный", "странный", "следят",
+            ],
+            
+            4: [  # НИЗКИЙ - консультация, не экстренно
+                # Хронические состояния
+                "хроническое", "постоянно", "уже давно", "периодически",
+                
+                # Общее недомогание
+                "плохо себя чувствую", "слабость", "усталость",
+                
+                # Информационные запросы
+                "как", "что делать", "посоветуйте", "подскажите",
+            ],
+            
+            5: [  # ОЧЕНЬ НИЗКИЙ - не экстренная ситуация
+                # Не критично
+                "небольшая", "легкая", "чуть-чуть", "немного",
+                "прошло", "уже лучше", "не так страшно",
+            ]
+        }
+    
+    def _calculate_priority(self, description: str, base_priority: int) -> int:
+        """Вычисление приоритета на основе ключевых слов в описании"""
+        description_lower = description.lower()
+        
+        # Проверяем критические ключевые слова (приоритет 1)
+        for keyword in self.priority_keywords[1]:
+            if keyword in description_lower:
+                return 1  # Максимальный приоритет
+        
+        # Проверяем высокий приоритет (2)
+        high_priority_count = sum(1 for keyword in self.priority_keywords[2] if keyword in description_lower)
+        if high_priority_count >= 2:  # Если найдено 2+ ключевых слова высокого приоритета
+            # Но проверяем, не хроническое ли это состояние
+            for low_keyword in self.priority_keywords[4]:
+                if low_keyword in description_lower:
+                    return 3  # Хроническое = средний приоритет
+            return 2  # Два признака высокого приоритета = высокий
+        elif high_priority_count >= 1:
+            # Проверяем на хроническое состояние
+            for low_keyword in self.priority_keywords[4]:
+                if low_keyword in description_lower:
+                    return 3
+            return 2
+        
+        # Проверяем низкий приоритет ПЕРЕД средним (приоритет проверки)
+        for keyword in self.priority_keywords[4]:
+            if keyword in description_lower:
+                return 4  # Хроническое/постоянное = низкий приоритет
+        
+        # Проверяем очень низкий приоритет (5)
+        for keyword in self.priority_keywords[5]:
+            if keyword in description_lower:
+                return 5  # Информационный запрос
+        
+        # Проверяем средний приоритет (3)
+        medium_priority_count = sum(1 for keyword in self.priority_keywords[3] if keyword in description_lower)
+        if medium_priority_count >= 3:
+            return 2
+        elif medium_priority_count >= 1:
+            return min(3, base_priority)
+        
+        # Возвращаем базовый приоритет типа ЧС
+        return base_priority
     
     def _load_keywords(self) -> Dict[str, Dict[str, Any]]:
         """Загрузка ключевых слов для каждого типа ЧС"""
@@ -524,11 +684,17 @@ class KeywordAdvisor:
             emergency_type = best_match[0]
             match_data = best_match[1]
             
+            # Вычисляем динамический приоритет на основе ключевых слов
+            base_priority = match_data["data"]["priority"]
+            calculated_priority = self._calculate_priority(description, base_priority)
+            
             return self._build_response(
                 emergency_type=emergency_type,
                 data=match_data["data"],
                 matched_keywords=match_data["keywords"],
-                confidence=min(match_data["count"] / 5.0, 1.0)  # Максимум 1.0
+                confidence=min(match_data["count"] / 5.0, 1.0),  # Максимум 1.0
+                calculated_priority=calculated_priority,
+                description=description
             )
         
         # Если совпадений нет - возвращаем общие советы
@@ -536,7 +702,9 @@ class KeywordAdvisor:
             emergency_type="general",
             data=self.keywords["general"],
             matched_keywords=[],
-            confidence=0.3
+            confidence=0.3,
+            calculated_priority=3,
+            description=description
         )
     
     def _build_response(
@@ -544,7 +712,9 @@ class KeywordAdvisor:
         emergency_type: str,
         data: Dict[str, Any],
         matched_keywords: List[str],
-        confidence: float
+        confidence: float,
+        calculated_priority: int,
+        description: str
     ) -> Dict[str, Any]:
         """Формирование ответа с советами"""
         
@@ -558,12 +728,21 @@ class KeywordAdvisor:
                     secondary_types.append(edata["name"])
                     break
         
+        # Определяем severity на основе приоритета
+        severity_map = {
+            1: "critical",
+            2: "high",
+            3: "medium",
+            4: "low",
+            5: "info"
+        }
+        
         return {
             "success": True,
             "detected_type": emergency_type,
             "type_name": data["name"],
-            "priority": data["priority"],
-            "severity": data["severity"],
+            "priority": calculated_priority,  # Используем вычисленный приоритет
+            "severity": severity_map.get(calculated_priority, data["severity"]),
             "confidence": round(confidence, 2),
             "matched_keywords": matched_keywords,
             "secondary_types": list(set(secondary_types)),
@@ -578,8 +757,41 @@ class KeywordAdvisor:
                 "скорая": "103"
             },
             "analyzed_at": datetime.utcnow().isoformat(),
-            "method": "keyword_matching"
+            "method": "keyword_matching",
+            "priority_reason": self._get_priority_reason(description, calculated_priority)
         }
+    
+    def _get_priority_reason(self, description: str, priority: int) -> str:
+        """Возвращает объяснение, почему был установлен такой приоритет"""
+        description_lower = description.lower()
+        
+        reasons = {
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        }
+        
+        # Собираем все найденные ключевые слова по уровням приоритета
+        for level, keywords in self.priority_keywords.items():
+            for keyword in keywords:
+                if keyword in description_lower:
+                    reasons[level].append(keyword)
+        
+        # Формируем объяснение на основе найденных ключевых слов
+        if reasons[1]:
+            return f"КРИТИЧЕСКАЯ СИТУАЦИЯ! Обнаружены критические признаки: {', '.join(reasons[1][:3])}"
+        elif reasons[2]:
+            return f"Высокий приоритет из-за: {', '.join(reasons[2][:3])}"
+        elif reasons[3]:
+            return f"Средний приоритет. Обнаружены признаки: {', '.join(reasons[3][:3])}"
+        elif reasons[4]:
+            return "Низкий приоритет. Ситуация не требует немедленного реагирования"
+        elif reasons[5]:
+            return "Информационный запрос"
+        else:
+            return f"Приоритет определен на основе типа ЧС (приоритет {priority})"
     
     def _get_default_response(self) -> Dict[str, Any]:
         """Ответ по умолчанию при пустом описании"""
