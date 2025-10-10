@@ -344,15 +344,15 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
   }, [autoOpen, getLocation])
 
   const resolveProviderLabel = (analysis: AIAnalysis | null): string => {
-    if (!analysis) return 'AI-помощник'
+    if (!analysis) return 'Автоматический анализ'
     const rawProvider = analysis.provider ?? analysis.model_used
-    if (!rawProvider) return 'AI-помощник'
+    if (!rawProvider) return 'Автоматический анализ'
     const normalized = rawProvider.toLowerCase()
-    if (normalized.includes('yandex')) {
-      return 'Яндекс GPT Lite'
+    if (normalized.includes('keyword')) {
+      return 'Система ключевых слов'
     }
     if (normalized.includes('gigachat')) {
-      return 'Сбер GigaChat (устарело)'
+      return 'Система рекомендаций (устарело)'
     }
     return rawProvider
   }
@@ -1159,7 +1159,7 @@ ${voiceTranscription}`
                   <div className="flex items-center gap-2">
                     <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
                       <Sparkles className="h-4 w-4" />
-                      AI-приоритизация активна
+                      Автоматическая приоритизация
                     </span>
                     <button
                       type="button"
@@ -1434,7 +1434,7 @@ ${voiceTranscription}`
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         {voiceConfidence && (
                           <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold text-white/80">
-                            ⚙️ Уверенность AI: {voiceConfidence}
+                            ⚙️ Уверенность: {voiceConfidence}
                           </span>
                         )}
                         {isRecording && (
@@ -1691,7 +1691,7 @@ ${voiceTranscription}`
                     ) : isAnalyzing ? (
                       <span className="flex items-center justify-center gap-2">
                         <Sparkles className="h-5 w-5 animate-pulse" />
-                        AI анализ...
+                        Анализ...
                       </span>
                     ) : (
                       '🚨 Отправить SOS'
@@ -1715,7 +1715,7 @@ ${voiceTranscription}`
         </div>
       )}
 
-      {/* AI Analysis Modal */}
+      {/* Advice Modal */}
       {showAIModal && aiAnalysis && (() => {
         const providerLabel = resolveProviderLabel(aiAnalysis)
         const priorityMeta = getPriorityMeta(aiAnalysis)
@@ -1763,13 +1763,13 @@ ${voiceTranscription}`
                     </div>
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
-                        <span>🤖 Анализ ситуации</span>
+                        <span>📋 Рекомендации</span>
                         <span className="text-sm text-purple-100">{providerLabel}</span>
                       </h2>
                       <p className="text-sm opacity-90">
                         {confidenceValue !== null
-                          ? `Уверенность модели: ${confidenceValue}%`
-                          : 'Уверенность модели уточняется'}
+                          ? `Уверенность: ${confidenceValue}%`
+                          : 'Уверенность уточняется'}
                       </p>
                     </div>
                   </div>
@@ -1862,10 +1862,10 @@ ${voiceTranscription}`
 
                     {aiAnalysis.error && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
-                        <p className="text-xs font-semibold text-red-800 mb-1">⚠️ Ошибка AI анализа</p>
+                        <p className="text-xs font-semibold text-red-800 mb-1">⚠️ Ошибка анализа</p>
                         <p className="text-xs text-red-700">{aiAnalysis.error}</p>
                         <p className="text-xs text-red-600 mt-2">
-                          Возможные причины: недоступность сервиса Яндекс GPT, исчерпанная квота или временная сетевая проблема.
+                          Возможные причины: временная сетевая проблема или недоступность сервиса.
                           Вызов успешно отправлен, но рекомендации могли быть неполными.
                         </p>
                       </div>
@@ -1968,7 +1968,7 @@ ${voiceTranscription}`
               {/* Debug Info */}
               <details className="mt-4 text-xs">
                 <summary className="cursor-pointer text-gray-500 hover:text-gray-700">
-                  🐛 Debug: Показать полные данные AI
+                  🐛 Debug: Показать полные данные
                 </summary>
                 <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-60">
                   {JSON.stringify(aiAnalysis, null, 2)}
