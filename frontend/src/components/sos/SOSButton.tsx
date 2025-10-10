@@ -1764,14 +1764,25 @@ ${voiceTranscription}`
                 </div>
               </div>
 
-              {/* Success Banner */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-green-900/30 to-emerald-900/20 border-l-4 border-green-500">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-400" />
-                  <div>
-                    <p className="font-semibold text-green-100">Вызов успешно отправлен!</p>
-                    <p className="text-sm text-green-300">
-                      Спасатели получили уведомление и уже направляются к вам
+              {/* Success Banner with Animation */}
+              <div className="relative overflow-hidden p-5 sm:p-6 bg-gradient-to-br from-green-900/40 to-emerald-900/30 border-l-4 border-green-400 shadow-lg">
+                {/* Animated background pulse */}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 animate-pulse"></div>
+                
+                <div className="relative flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping"></div>
+                      <CheckCircle className="relative w-8 h-8 text-green-400" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-lg text-green-100 mb-1">✅ Вызов успешно отправлен!</p>
+                    <p className="text-sm text-green-200">
+                      Спасательная служба получила уведомление и уже направляется к вам
+                    </p>
+                    <p className="text-xs text-green-300/80 mt-1">
+                      🚨 Оставайтесь на связи • Время реагирования: 5-15 минут
                     </p>
                   </div>
                 </div>
@@ -1857,39 +1868,65 @@ ${voiceTranscription}`
                 </div>
               </div>
 
-              {/* Immediate Actions */}
+              {/* Immediate Actions - Enhanced */}
               {aiAnalysis.immediate_actions && aiAnalysis.immediate_actions.length > 0 && (
-                <div className="mb-4 bg-gradient-to-br from-red-900/30 to-orange-900/20 border border-red-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-red-300 mb-3 flex items-center gap-2 text-lg">
-                    <span className="text-red-400">⚡</span>
-                    Немедленные действия
-                  </h3>
-                  <ul className="space-y-2">
+                <div className="mb-4 relative overflow-hidden bg-gradient-to-br from-red-900/40 to-orange-900/30 border-2 border-red-600/50 rounded-xl p-5 shadow-xl">
+                  {/* Urgency indicator */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500 animate-pulse"></div>
+                  
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-red-500/20 p-2 rounded-lg">
+                      <span className="text-2xl">⚡</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-red-200 text-xl">Немедленные действия</h3>
+                      <p className="text-xs text-red-300/80">Выполните в указанном порядке</p>
+                    </div>
+                  </div>
+                  
+                  <ul className="space-y-3">
                     {aiAnalysis.immediate_actions.map((action, index) => (
-                      <li key={index} className="flex items-start gap-3 text-sm bg-slate-900/40 p-3 rounded-lg">
-                        <span className="text-red-400 font-bold text-lg min-w-[24px]">{index + 1}.</span>
-                        <span className="text-slate-100">{action}</span>
+                      <li key={index} className="flex items-start gap-3 bg-slate-900/60 p-4 rounded-lg border border-red-800/30 hover:border-red-700/50 transition-all group">
+                        <div className="flex-shrink-0 w-8 h-8 bg-red-600 text-white font-bold rounded-full flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+                          {index + 1}
+                        </div>
+                        <span className="text-slate-100 text-base leading-relaxed">{action}</span>
                       </li>
                     ))}
                   </ul>
+                  
+                  <div className="mt-4 p-3 bg-red-950/50 rounded-lg border border-red-800/30">
+                    <p className="text-xs text-red-200 flex items-center gap-2">
+                      <span>⏱️</span>
+                      <span className="font-semibold">Время критично!</span> 
+                      <span>Действуйте быстро и решительно</span>
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Required Resources */}
+              {/* Required Resources - Enhanced */}
               {aiAnalysis.required_resources && aiAnalysis.required_resources.length > 0 && (
-                <div className="mb-4 bg-gradient-to-br from-blue-900/30 to-cyan-900/20 border border-blue-700/50 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-300 mb-3 flex items-center gap-2 text-lg">
-                    <span className="text-blue-400">🚒</span>
-                    Необходимые ресурсы
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
+                <div className="mb-4 bg-gradient-to-br from-blue-900/40 to-cyan-900/30 border border-blue-600/50 rounded-xl p-5 shadow-lg">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-blue-500/20 p-2 rounded-lg">
+                      <span className="text-2xl">🚒</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-blue-200 text-xl">Задействованные службы</h3>
+                      <p className="text-xs text-blue-300/80">Следующие ресурсы направлены на место происшествия</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {aiAnalysis.required_resources.map((resource, index) => (
-                      <span
+                      <div
                         key={index}
-                        className="px-3 py-2 bg-blue-900/50 text-blue-200 border border-blue-700 rounded-lg text-sm font-medium"
+                        className="flex items-center gap-3 px-4 py-3 bg-blue-950/50 border border-blue-700/40 rounded-lg hover:border-blue-600/60 transition-all group"
                       >
-                        {resource}
-                      </span>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:animate-pulse"></div>
+                        <span className="text-blue-100 font-medium text-sm">{resource}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1941,21 +1978,43 @@ ${voiceTranscription}`
               )}
               </div>
 
-              {/* Close Button */}
-              <div className="p-5 sm:p-6 bg-slate-900/50 border-t border-slate-700">
+              {/* Close Button - Enhanced */}
+              <div className="p-5 sm:p-6 bg-gradient-to-b from-slate-900/50 to-slate-950 border-t border-slate-700">
               <button
                 onClick={() => setShowAIModal(false)}
-                className="w-full px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all font-semibold shadow-lg"
+                className="group relative w-full px-8 py-4 bg-gradient-to-r from-orange-600 via-red-600 to-rose-600 text-white rounded-xl hover:from-orange-700 hover:via-red-700 hover:to-rose-700 transition-all font-bold text-lg shadow-2xl hover:shadow-orange-900/50 hover:scale-[1.02] active:scale-[0.98]"
               >
-                Понятно
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Понятно, я ознакомлен
+                </span>
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
               </button>
+
+              {/* Emergency Numbers Quick Reference */}
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <div className="bg-red-950/50 border border-red-800/30 rounded-lg p-2">
+                  <p className="text-xs text-red-300">Пожарная</p>
+                  <p className="text-lg font-bold text-red-200">101</p>
+                </div>
+                <div className="bg-blue-950/50 border border-blue-800/30 rounded-lg p-2">
+                  <p className="text-xs text-blue-300">Полиция</p>
+                  <p className="text-lg font-bold text-blue-200">102</p>
+                </div>
+                <div className="bg-green-950/50 border border-green-800/30 rounded-lg p-2">
+                  <p className="text-xs text-green-300">Скорая</p>
+                  <p className="text-lg font-bold text-green-200">103</p>
+                </div>
+              </div>
 
               {/* Debug Info */}
               <details className="mt-4 text-xs">
-                <summary className="cursor-pointer text-slate-400 hover:text-slate-300">
-                  🐛 Debug: Показать полные данные
+                <summary className="cursor-pointer text-slate-400 hover:text-slate-300 flex items-center gap-2">
+                  <span>🐛</span>
+                  <span>Debug: Показать полные данные</span>
                 </summary>
-                <pre className="mt-2 p-3 bg-slate-950 rounded text-xs overflow-auto max-h-60 text-slate-300">
+                <pre className="mt-2 p-3 bg-slate-950 border border-slate-800 rounded text-xs overflow-auto max-h-60 text-slate-300">
                   {JSON.stringify(aiAnalysis, null, 2)}
                 </pre>
               </details>
