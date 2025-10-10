@@ -504,36 +504,35 @@ export default function SOSButton({ autoOpen = false, hideTrigger = false, onClo
     }
 
     try {
-      const response = await api.post('/api/v1/ai/analyze/text', {
-        text: cleanedText,
-        analysis_type: 'classify',
-        source: 'speech_recognition'
+      const response = await api.post('/api/v1/advice/analyze', {
+        description: cleanedText
       })
 
-      if (response.data?.success && response.data.analysis) {
-        const analysis = response.data.analysis as AIAnalysis
+      if (response.data) {
+        const analysis = response.data
         const normalized: VoiceAnalysisResult = {
           transcription: cleanedText,
-          emergency_type: analysis.type,
+          emergency_type: analysis.detected_type || analysis.emergency_type,
           priority: analysis.priority,
           severity: analysis.severity,
-          description: analysis.notes || analysis.risk_assessment || analysis.type_description,
-          location_info: analysis.location_hints?.[0],
+          description: analysis.type_name || analysis.detected_type,
+          location_info: undefined,
           required_resources: analysis.required_resources,
           immediate_actions: analysis.immediate_actions,
-          keywords: analysis.keywords,
-          confidence: analysis.confidence,
-          time_sensitive: Boolean(analysis.immediate_actions?.some((action) => /немедлен/i.test(action)))
+          recommendations: analysis.safety_tips,
+          keywords: analysis.matched_keywords || analysis.keywords,
+          confidence: analysis.confidence || 0.8,
+          time_sensitive: Boolean(analysis.immediate_actions?.some((action: string) => /немедлен/i.test(action)))
         }
 
         setVoiceAnalysis(normalized)
 
-        if (analysis.type && TYPE_FALLBACKS[analysis.type]) {
-          setEmergencyType(analysis.type as EmergencyType)
+        if (analysis.detected_type && TYPE_FALLBACKS[analysis.detected_type]) {
+          setEmergencyType(analysis.detected_type as EmergencyType)
         }
 
         if (!title.trim()) {
-          const candidate = analysis.type_name || analysis.type || cleanedText.slice(0, 120)
+          const candidate = analysis.type_name || analysis.detected_type || cleanedText.slice(0, 120)
           setTitle(candidate.slice(0, 120))
         }
 
@@ -909,7 +908,7 @@ ${voiceTranscription}`
 
   const analyzeWithAI = async () => {
     if (!description || description.length < 10) {
-      setError('Пожалуйста, добавьте более подробное описание для AI анализа')
+      setError('Пожалуйста, добавьте более подробное описание для анализа')
       return
     }
 
@@ -917,30 +916,49 @@ ${voiceTranscription}`
     setError(null)
 
     try {
-      const response = await api.post('/api/v1/ai/analyze/text', {
-        text: description,
-        analysis_type: 'classify'
+      const response = await api.post('/api/v1/advice/analyze', {
+        description: description
       })
 
-      console.log('🤖 AI Response:', response.data)
+      console.log('🤖 Advice Response:', response.data)
 
-      if (response.data.success) {
-        const analysis = response.data.analysis
-        console.log('📊 AI Analysis:', analysis)
+      if (response.data) {
+        const analysis = response.data
+        console.log('📊 Analysis:', analysis)
         console.log('🎯 Confidence:', analysis.confidence)
         console.log('⚡ Immediate Actions:', analysis.immediate_actions)
-        console.log('📋 Risk Assessment:', analysis.risk_assessment)
+        console.log('📋 Severity:', analysis.severity)
         
-        setAiAnalysis(analysis)
+        // Нормализация структуры для совместимости с интерфейсом AIAnalysis
+        const normalizedAnalysis: AIAnalysis = {
+          type: analysis.detected_type || analysis.emergency_type || 'general',
+          type_name: analysis.type_name,
+          priority: analysis.priority || 3,
+          severity: analysis.severity || 'medium',
+          keywords: analysis.matched_keywords || [],
+          confidence: analysis.confidence || 0.5,
+          estimated_victims: null,
+          location_hints: [],
+          required_resources: analysis.required_resources || [],
+          immediate_actions: analysis.immediate_actions || [],
+          risk_assessment: analysis.warning || `Уровень опасности: ${analysis.severity}`,
+          warning: analysis.warning,
+          notes: analysis.secondary_types?.length > 0 
+            ? `Возможно также: ${analysis.secondary_types.join(', ')}` 
+            : null,
+          model_used: analysis.method || 'keyword_matching'
+        }
+        
+        setAiAnalysis(normalizedAnalysis)
         setShowAIModal(true)
         
-        if (analysis.type) {
-          setEmergencyType(analysis.type as EmergencyType)
+        if (analysis.detected_type) {
+          setEmergencyType(analysis.detected_type as EmergencyType)
         }
       }
     } catch (err: any) {
-      console.error('AI analysis failed:', err)
-  setError('Не удалось выполнить анализ в Яндекс GPT. Продолжаем без рекомендаций.')
+      console.error('Analysis failed:', err)
+      setError('Не удалось выполнить анализ. Продолжаем без рекомендаций.')
     } finally {
       setIsAnalyzing(false)
     }
