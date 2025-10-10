@@ -263,23 +263,23 @@ export default function CitizenDashboard() {
               </div>
             </div>
 
-            <div className="card-modern bg-white/90 text-slate-900 p-6 space-y-4">
-              <h3 className="text-lg font-semibold">Советы по безопасности</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
+            <div className="backdrop-blur-2xl bg-white/5 rounded-3xl border border-white/20 shadow-2xl p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-white">Советы по безопасности</h3>
+              <ul className="space-y-2 text-sm text-white/80">
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-amber-400 mt-1">•</span>
                   <span>Сохраняйте спокойствие и позаботьтесь о личной безопасности</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-amber-400 mt-1">•</span>
                   <span>Сообщите диспетчеру точный адрес и ориентиры</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-amber-400 mt-1">•</span>
                   <span>Следуйте инструкциям операторов и не отключайтесь</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-amber-400 mt-1">•</span>
                   <span>Не покидайте место происшествия без уведомления служб</span>
                 </li>
               </ul>
