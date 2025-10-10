@@ -949,11 +949,17 @@ ${voiceTranscription}`
       setSuccessMessage('Сигнал SOS отправлен. Спасатели получили уведомление.')
       
       // Показываем рекомендации, если есть описание
+      console.log('📝 Description:', description)
+      console.log('📏 Description length:', description?.length)
+      
       if (description && description.length >= 10) {
+        console.log('🔄 Starting advice analysis...')
         try {
           const response = await api.post('/api/v1/advice/analyze', {
             description: description
           })
+
+          console.log('✅ Advice response received:', response.data)
 
           if (response.data) {
             const analysis = response.data
@@ -978,13 +984,16 @@ ${voiceTranscription}`
               model_used: analysis.method || 'keyword_matching'
             }
             
+            console.log('📊 Normalized analysis:', normalizedAnalysis)
             setAiAnalysis(normalizedAnalysis)
+            console.log('🎯 Setting showAIModal to true')
             setShowAIModal(true)
           }
         } catch (err: any) {
-          console.error('Analysis failed:', err)
+          console.error('❌ Analysis failed:', err)
         }
       } else {
+        console.log('⚠️ No description or too short, skipping analysis')
         // Если нет описания, просто закрываем форму через 4 секунды
         setTimeout(() => {
           handleClose()
@@ -1688,7 +1697,7 @@ ${voiceTranscription}`
       )}
 
       {/* Advice Modal */}
-      {showAIModal && aiAnalysis && (() => {
+      {showAIModal && aiAnalysis && ((() => {
         const providerLabel = resolveProviderLabel(aiAnalysis)
         const priorityMeta = getPriorityMeta(aiAnalysis)
         const severityMeta = getSeverityMeta(aiAnalysis)
@@ -1953,7 +1962,7 @@ ${voiceTranscription}`
             </div>
           </div>
         )
-      })()}
+      })())}
     </>
   )
 }
