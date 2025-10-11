@@ -202,8 +202,8 @@ fun RescuerDashboard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
                     RescuerHeroCard(
@@ -212,7 +212,8 @@ fun RescuerDashboard(
                         teamCount = teamAlerts.size,
                         availableCount = availableAlerts.size,
                         lastUpdated = lastUpdateMillis,
-                        onTestSiren = { showTestDialog = true }
+                        onTestSiren = { showTestDialog = true },
+                        onLogout = onLogout
                     )
                 }
 
@@ -329,19 +330,20 @@ private fun RescuerHeroCard(
     teamCount: Int,
     availableCount: Int,
     lastUpdated: Long,
-    onTestSiren: () -> Unit
+    onTestSiren: () -> Unit,
+    onLogout: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(36.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = GlassDark.copy(alpha = 0.88f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -363,17 +365,20 @@ private fun RescuerHeroCard(
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
-                Surface(
-                    onClick = onTestSiren,
-                    shape = RoundedCornerShape(28.dp),
-                    color = Color.Transparent,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
+                
+                // Только кнопка выхода
+                IconButton(
+                    onClick = onLogout,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.15f))
                 ) {
-                    Text(
-                        text = "Тест сирены",
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = "Выход",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

@@ -104,7 +104,7 @@ export default function OperatorDashboard() {
       
       const [alertsRes, statsRes, teamsRes] = await Promise.all([
         api.get(`/api/v1/sos?${params.toString()}`),
-        api.get('/api/v1/analytics/stats'),
+        api.get('/api/v1/analytics/dashboard'),
         api.get('/api/v1/teams')
       ])
       

@@ -131,8 +131,8 @@ fun CitizenDashboard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 36.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
                     CitizenHeroCard(
@@ -215,7 +215,7 @@ private fun CitizenHeroCard(
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(36.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, pressedElevation = 0.dp)
     ) {
@@ -226,21 +226,21 @@ private fun CitizenHeroCard(
                         colors = listOf(AuroraRose, AuroraViolet)
                     )
                 )
-                .padding(24.dp)
+                .padding(16.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.18f)),
                             contentAlignment = Alignment.Center
@@ -249,13 +249,13 @@ private fun CitizenHeroCard(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
                                 tint = Color.White.copy(alpha = 0.9f),
-                                modifier = Modifier.size(30.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
                                 text = user.full_name,
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.titleLarge,
                                 color = Color.White
                             )
                             Text(
@@ -501,7 +501,7 @@ private fun QuickActionsSection(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = "Выберите ситуацию",
@@ -509,13 +509,13 @@ private fun QuickActionsSection(
             color = Color.White
         )
         Text(
-            text = "AI ассистент поможет уточнить детали и приоритет",
+            text = "Опишите ситуацию максимально подробно",
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.68f)
         )
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(actions) { action ->
                 QuickActionCard(
@@ -533,13 +533,13 @@ private fun QuickActionCard(action: QuickAction, selected: Boolean, onSelect: ()
     val borderColor = if (selected) Color.White.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.18f)
     Box(
         modifier = Modifier
-            .width(220.dp)
-            .height(140.dp)
-            .clip(RoundedCornerShape(28.dp))
+            .width(200.dp)
+            .height(120.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(Brush.linearGradient(action.gradient))
-            .border(1.dp, borderColor, RoundedCornerShape(28.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
             .clickable(onClick = onSelect)
-            .padding(18.dp)
+            .padding(14.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -567,15 +567,15 @@ private fun QuickActionCard(action: QuickAction, selected: Boolean, onSelect: ()
 private fun PreparednessCard() {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = GlassWhite.copy(alpha = 0.92f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 14.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Как подготовиться",
@@ -583,11 +583,11 @@ private fun PreparednessCard() {
                 color = Gray900
             )
             Text(
-                text = "Сохраняйте спокойствие, говорите чётко и следуйте инструкциям AI ассистента.",
+                text = "Сохраняйте спокойствие, говорите чётко и следуйте инструкциям оператора.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Gray600
             )
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 PreparednessItem("📍 Уточните адрес или ориентиры, чтобы бригада быстрее вас нашла")
                 PreparednessItem("🧍‍♂️ Сообщите о числе пострадавших и их состоянии")
                 PreparednessItem("⚠️ Укажите опасности: газ, огонь, замкнутые пространства")
@@ -610,15 +610,15 @@ private fun PreparednessItem(text: String) {
 private fun EmergencyNumbersCard() {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = CardSurfaceDark.copy(alpha = 0.92f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Телефоны экстренных служб",
@@ -712,7 +712,7 @@ private fun CreateAlertDialog(
     onConfirm: () -> Unit
 ) {
     val typeOptions = remember { buildQuickActions() }
-    val confirmEnabled = description.trim().length >= 10
+    val confirmEnabled = description.trim().length >= 3
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -779,7 +779,7 @@ private fun CreateAlertDialog(
                 )
 
                 Text(
-                    text = if (confirmEnabled) "Спасибо, диспетчеры готовы принять вызов" else "Добавьте минимум 10 символов, чтобы мы точно поняли ситуацию",
+                    text = if (confirmEnabled) "Спасибо, диспетчеры готовы принять вызов" else "Добавьте минимум 3 символа описания ситуации",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (confirmEnabled) SignalEmerald else AuroraRose
                 )

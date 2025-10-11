@@ -222,7 +222,7 @@ private fun HeroSection() {
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Отправляйте SOS, управляйте бригадами и получайте аналитику ИИ в одном интерфейсе.",
+                text = "Отправляйте SOS, управляйте бригадами и получайте аналитику в одном интерфейсе.",
                 textAlign = TextAlign.Center,
                 color = Color.White.copy(alpha = 0.72f),
                 fontSize = 15.sp,
