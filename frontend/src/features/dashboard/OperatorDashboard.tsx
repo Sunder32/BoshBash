@@ -554,21 +554,10 @@ export default function OperatorDashboard() {
                             )}
 
                             {alert.status === 'in_progress' && (
-                              <>
-                                <button
-                                  onClick={() => handleUpdateStatus(alert.id, 'completed')}
-                                  className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-500/80 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-500"
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                  Завершено
-                                </button>
-                                <button
-                                  onClick={() => handleUpdateStatus(alert.id, 'cancelled')}
-                                  className="flex items-center justify-center gap-2 rounded-2xl border border-rose-400/40 px-4 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/10"
-                                >
-                                  Отменить выезд
-                                </button>
-                              </>
+                              <span className="flex items-center justify-center gap-2 rounded-2xl border border-violet-400/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-100">
+                                <Activity className="h-4 w-4" />
+                                В работе
+                              </span>
                             )}
 
                             {alert.status === 'completed' && (
