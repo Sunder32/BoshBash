@@ -45,10 +45,10 @@ def enrich_alert_with_names(alert: SOSAlert, db: Session) -> dict:
         "advice": alert.ai_analysis,  # Переименовали поле для совместимости
         "assigned_to": alert.assigned_to,
         "team_id": alert.team_id,
-        "created_at": alert.created_at,
-        "updated_at": alert.updated_at,
-        "assigned_at": alert.assigned_at,
-        "completed_at": alert.completed_at,
+        "created_at": alert.created_at.isoformat() if alert.created_at else None,
+        "updated_at": alert.updated_at.isoformat() if alert.updated_at else None,
+        "assigned_at": alert.assigned_at.isoformat() if alert.assigned_at else None,
+        "completed_at": alert.completed_at.isoformat() if alert.completed_at else None,
         "assigned_to_name": None,
         "team_name": None
     }
