@@ -31,7 +31,10 @@ async def download_android_app():
         path=apk_path,
         media_type="application/vnd.android.package-archive",
         filename=filename,
-        headers={"Cache-Control": "no-cache"}
+        headers={
+            "Cache-Control": "no-cache",
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
     )
 
 

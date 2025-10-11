@@ -117,9 +117,7 @@ export function DownloadAppButton({ variant = 'primary', compact = false }: Down
       <a
         href={ANDROID_APK_URL}
         className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400 focus-visible:ring-offset-slate-950 ${baseClasses} ${compact ? 'px-4 py-2 text-xs' : ''}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        download
+        download="sos-mobile-latest.apk"
         type="application/vnd.android.package-archive"
         data-availability={status}
       >

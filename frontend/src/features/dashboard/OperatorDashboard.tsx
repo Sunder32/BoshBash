@@ -544,13 +544,10 @@ export default function OperatorDashboard() {
                             )}
 
                             {alert.status === 'assigned' && (
-                              <button
-                                onClick={() => handleUpdateStatus(alert.id, 'in_progress')}
-                                className="flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
-                              >
-                                <Activity className="h-4 w-4" />
-                                Подтвердить выезд
-                              </button>
+                              <span className="flex items-center justify-center gap-2 rounded-2xl border border-sky-400/50 bg-sky-500/10 px-4 py-3 text-sm font-semibold text-sky-100">
+                                <Shield className="h-4 w-4" />
+                                Назначено на бригаду
+                              </span>
                             )}
 
                             {alert.status === 'in_progress' && (
