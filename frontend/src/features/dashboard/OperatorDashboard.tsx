@@ -93,6 +93,7 @@ export default function OperatorDashboard() {
   const [filterType, setFilterType] = useState<string>('all')
   const [showTeamModal, setShowTeamModal] = useState(false)
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null)
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
 
   const fetchData = async () => {
     try {
@@ -139,14 +140,20 @@ export default function OperatorDashboard() {
 
   const openTeamModal = (alertId: string) => {
     setSelectedAlertId(alertId)
+    setSelectedTeamId(null)
     setShowTeamModal(true)
   }
 
-  const handleSelectTeam = async (teamId: string) => {
-    if (selectedAlertId) {
-      await handleAssignAlert(selectedAlertId, teamId)
+  const handleSelectTeam = (teamId: string) => {
+    setSelectedTeamId(teamId)
+  }
+
+  const handleConfirmTeamSelection = async () => {
+    if (selectedAlertId && selectedTeamId) {
+      await handleAssignAlert(selectedAlertId, selectedTeamId)
       setShowTeamModal(false)
       setSelectedAlertId(null)
+      setSelectedTeamId(null)
     }
   }
 
@@ -688,7 +695,11 @@ export default function OperatorDashboard() {
                   <button
                     key={team.id}
                     onClick={() => handleSelectTeam(team.id)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-sky-400/50 hover:bg-white/10"
+                    className={`w-full rounded-2xl border p-4 text-left transition ${
+                      selectedTeamId === team.id
+                        ? 'border-sky-400 bg-sky-500/20 ring-2 ring-sky-400/50'
+                        : 'border-white/10 bg-white/5 hover:border-sky-400/50 hover:bg-white/10'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div>
@@ -701,7 +712,7 @@ export default function OperatorDashboard() {
                           <p className="mt-1 text-xs text-slate-400">Участников: {team.member_count}</p>
                         )}
                       </div>
-                      <Shield className="h-5 w-5 text-sky-400" />
+                      <Shield className={`h-5 w-5 transition ${selectedTeamId === team.id ? 'text-sky-300' : 'text-sky-400'}`} />
                     </div>
                   </button>
                 ))
@@ -713,10 +724,18 @@ export default function OperatorDashboard() {
                 onClick={() => {
                   setShowTeamModal(false)
                   setSelectedAlertId(null)
+                  setSelectedTeamId(null)
                 }}
                 className="flex-1 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
               >
                 Отмена
+              </button>
+              <button
+                onClick={handleConfirmTeamSelection}
+                disabled={!selectedTeamId}
+                className="flex-1 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Подтвердить
               </button>
             </div>
           </div>
