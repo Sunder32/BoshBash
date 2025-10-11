@@ -87,9 +87,12 @@ export default function OperatorDashboard() {
   const { user, logout } = useAuthStore()
   const [alerts, setAlerts] = useState<SOSAlert[]>([])
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterType, setFilterType] = useState<string>('all')
+  const [showTeamModal, setShowTeamModal] = useState(false)
+  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null)
 
   const fetchData = async () => {
     try {
@@ -99,11 +102,15 @@ export default function OperatorDashboard() {
       if (filterStatus !== 'all') params.append('status', filterStatus)
       if (filterType !== 'all') params.append('type', filterType)
       
-      const alertsResponse = await api.get(`/api/v1/sos/?${params}`)
-      setAlerts(alertsResponse.data)
-
-      const statsResponse = await api.get('/api/v1/analytics/dashboard')
-      setStats(statsResponse.data)
+      const [alertsRes, statsRes, teamsRes] = await Promise.all([
+        api.get(`/api/v1/sos?${params.toString()}`),
+        api.get('/api/v1/analytics/stats'),
+        api.get('/api/v1/teams')
+      ])
+      
+      setAlerts(alertsRes.data || [])
+      setStats(statsRes.data || null)
+      setTeams(teamsRes.data || [])
     } catch (error) {
       console.error('Failed to fetch data:', error)
     } finally {
@@ -117,14 +124,29 @@ export default function OperatorDashboard() {
     return () => clearInterval(interval)
   }, [filterStatus, filterType])
 
-  const handleAssignAlert = async (alertId: string) => {
+  const handleAssignAlert = async (alertId: string, teamId?: string) => {
     try {
-      await api.patch(`/api/v1/sos/${alertId}`, {
-        status: 'assigned'
-      })
+      const payload: any = { status: 'assigned' }
+      if (teamId) {
+        payload.team_id = teamId
+      }
+      await api.patch(`/api/v1/sos/${alertId}`, payload)
       fetchData()
     } catch (error) {
       console.error('Failed to assign alert:', error)
+    }
+  }
+
+  const openTeamModal = (alertId: string) => {
+    setSelectedAlertId(alertId)
+    setShowTeamModal(true)
+  }
+
+  const handleSelectTeam = async (teamId: string) => {
+    if (selectedAlertId) {
+      await handleAssignAlert(selectedAlertId, teamId)
+      setShowTeamModal(false)
+      setSelectedAlertId(null)
     }
   }
 
@@ -499,11 +521,11 @@ export default function OperatorDashboard() {
                             {alert.status === 'pending' && (
                               <>
                                 <button
-                                  onClick={() => handleAssignAlert(alert.id)}
+                                  onClick={() => openTeamModal(alert.id)}
                                   className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:shadow-indigo-500/40"
                                 >
-                                  <Phone className="h-4 w-4" />
-                                  Взять в работу
+                                  <Shield className="h-4 w-4" />
+                                  Назначить бригаду
                                 </button>
                                 <button
                                   onClick={() => handleUpdateStatus(alert.id, 'cancelled')}
@@ -650,6 +672,56 @@ export default function OperatorDashboard() {
           </aside>
         </div>
       </main>
+
+      {/* Team Selection Modal */}
+      {showTeamModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-slate-800/95 to-slate-900/95 p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-white">Выберите бригаду</h3>
+            <p className="mt-2 text-sm text-slate-300">Назначьте спасательную бригаду на вызов</p>
+            
+            <div className="mt-6 space-y-2 max-h-96 overflow-y-auto">
+              {teams.length === 0 ? (
+                <p className="text-center text-sm text-slate-400">Нет доступных бригад</p>
+              ) : (
+                teams.map((team) => (
+                  <button
+                    key={team.id}
+                    onClick={() => handleSelectTeam(team.id)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-sky-400/50 hover:bg-white/10"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-semibold text-white">{team.name}</h4>
+                        <p className="mt-1 text-sm text-slate-300">{team.type}</p>
+                        {team.leader_name && (
+                          <p className="mt-1 text-xs text-slate-400">Лидер: {team.leader_name}</p>
+                        )}
+                        {team.member_count !== undefined && (
+                          <p className="mt-1 text-xs text-slate-400">Участников: {team.member_count}</p>
+                        )}
+                      </div>
+                      <Shield className="h-5 w-5 text-sky-400" />
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowTeamModal(false)
+                  setSelectedAlertId(null)
+                }}
+                className="flex-1 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/5"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
