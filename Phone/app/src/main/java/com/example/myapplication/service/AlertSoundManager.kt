@@ -34,15 +34,21 @@ class AlertSoundManager(private val context: Context) {
      */
     fun playAlertSound() {
         try {
+            Log.d("AlertSoundManager", "🔊 playAlertSound() called")
+            
             stopAlertSound() // Останавливаем предыдущий звук если играет
             
             // Используем системный звук уведомления (максимально громкий)
             val alertUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             
+            Log.d("AlertSoundManager", "Alert URI: $alertUri")
+            
             requestAudioFocus()
+            Log.d("AlertSoundManager", "Audio focus requested")
 
             mediaPlayer = MediaPlayer().apply {
+                Log.d("AlertSoundManager", "Setting data source...")
                 setDataSource(context, alertUri)
                 
                 // Настраиваем для максимальной громкости
@@ -54,30 +60,39 @@ class AlertSoundManager(private val context: Context) {
                 )
                 
                 // Устанавливаем максимальную громкость
+                val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
                 val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+                Log.d("AlertSoundManager", "Current alarm volume: $currentVolume / $maxVolume")
                 audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+                Log.d("AlertSoundManager", "Set alarm volume to max: $maxVolume")
                 
                 // Зацикливаем звук
                 isLooping = true
+                Log.d("AlertSoundManager", "Sound set to looping")
                 
                 setOnPreparedListener {
+                    Log.d("AlertSoundManager", "🎵 MediaPlayer prepared, starting playback...")
                     it.start()
-                    Log.d("AlertSoundManager", "Alert sound started")
+                    Log.d("AlertSoundManager", "✅ Alert sound started successfully!")
                 }
                 
                 setOnErrorListener { mp, what, extra ->
-                    Log.e("AlertSoundManager", "MediaPlayer error: what=$what, extra=$extra")
+                    Log.e("AlertSoundManager", "❌ MediaPlayer error: what=$what, extra=$extra")
                     true
                 }
                 
+                Log.d("AlertSoundManager", "Calling prepareAsync()...")
                 prepareAsync()
             }
             
             // Добавляем вибрацию
+            Log.d("AlertSoundManager", "Starting vibration...")
             startVibration()
+            Log.d("AlertSoundManager", "✅ playAlertSound() completed")
             
         } catch (e: Exception) {
-            Log.e("AlertSoundManager", "Error playing alert sound", e)
+            Log.e("AlertSoundManager", "❌ Error playing alert sound", e)
+            e.printStackTrace()
         }
     }
     

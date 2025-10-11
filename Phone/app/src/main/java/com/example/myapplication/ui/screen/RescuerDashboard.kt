@@ -202,8 +202,8 @@ fun RescuerDashboard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
                     RescuerHeroCard(
@@ -275,46 +275,59 @@ private fun RescuerTopBar(
         color = Color.Transparent,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = "Панель спасателя",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "$userName • обновлено ${formatUpdateTime(lastUpdateMillis)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.65f)
+                    color = Color.White.copy(alpha = 0.7f)
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                IconButton(onClick = onRefreshClick) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = onRefreshClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Обновить",
-                        tint = if (isRefreshing) SkyPulseLight else Color.White.copy(alpha = 0.8f)
+                        tint = if (isRefreshing) SkyPulseLight else Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                IconButton(onClick = onTestSiren) {
+                IconButton(
+                    onClick = onTestSiren,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.VolumeUp,
                         contentDescription = "Тест сирены",
-                        tint = AuroraRose
+                        tint = AuroraRose,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                IconButton(onClick = onLogout) {
+                IconButton(
+                    onClick = onLogout,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Logout,
                         contentDescription = "Выход",
-                        tint = Color.White.copy(alpha = 0.8f)
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -342,19 +355,20 @@ private fun RescuerHeroCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = user.full_name ?: user.email,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = Color.White
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = buildString {
@@ -370,7 +384,7 @@ private fun RescuerHeroCard(
                 IconButton(
                     onClick = onLogout,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                 ) {
@@ -378,7 +392,7 @@ private fun RescuerHeroCard(
                         imageVector = Icons.Default.Logout,
                         contentDescription = "Выход",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -386,16 +400,17 @@ private fun RescuerHeroCard(
             if (user.team_name != null) {
                 Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(Color.White.copy(alpha = 0.1f))
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Group,
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.9f)
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(18.dp)
                     )
                     Text(
                         text = user.team_name,
@@ -405,11 +420,11 @@ private fun RescuerHeroCard(
                     if (user.is_team_leader) {
                         Surface(
                             color = AuroraRose.copy(alpha = 0.25f),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
                                 text = "Лидер",
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White
                             )
@@ -421,25 +436,25 @@ private fun RescuerHeroCard(
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 maxItemsInEachRow = 3
             ) {
                 HeroStatPill(
-                    modifier = Modifier.widthIn(min = 140.dp, max = 220.dp),
+                    modifier = Modifier.widthIn(min = 100.dp, max = 180.dp),
                     label = "Мои",
                     value = myCount
                 )
                 if (user.team_id != null) {
                     HeroStatPill(
-                        modifier = Modifier.widthIn(min = 140.dp, max = 220.dp),
+                        modifier = Modifier.widthIn(min = 100.dp, max = 180.dp),
                         label = "Команда",
                         value = teamCount
                     )
                 }
                 if (user.is_team_leader) {
                     HeroStatPill(
-                        modifier = Modifier.widthIn(min = 140.dp, max = 220.dp),
+                        modifier = Modifier.widthIn(min = 100.dp, max = 180.dp),
                         label = "Доступно",
                         value = availableCount,
                         accent = LuminousAmber
@@ -465,16 +480,16 @@ private fun HeroStatPill(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(Color.White.copy(alpha = 0.08f))
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(28.dp))
-            .padding(vertical = 14.dp),
+            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+            .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
             text = value.toString(),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             color = accent,
             fontWeight = FontWeight.Bold
         )
@@ -491,24 +506,27 @@ private fun MetricsRow(stats: List<QuickStat>) {
     @OptIn(ExperimentalLayoutApi::class)
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         maxItemsInEachRow = 3
     ) {
         stats.forEach { stat ->
             Box(
                 modifier = Modifier
-                    .widthIn(min = 140.dp, max = 220.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .widthIn(min = 100.dp, max = 180.dp)
+                    .clip(RoundedCornerShape(20.dp))
                     .background(Brush.linearGradient(stat.gradient))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(24.dp))
-                    .padding(vertical = 16.dp),
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally, 
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
                         text = stat.value.toString(),
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.headlineMedium,
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -610,22 +628,26 @@ private fun RescuerAlertCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(24.dp))
             .background(GlassDark.copy(alpha = 0.82f))
-            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(28.dp))
-            .padding(22.dp)
+            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
+            .padding(16.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
                         text = alert.title ?: typeLabel,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
                     )
                     if (createdLabel != null) {
                         Text(
@@ -674,13 +696,13 @@ private fun RescuerAlertCard(
             }
 
             if (alert.team_name != null || alert.assigned_to_name != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     alert.team_name?.let { InfoChip(text = it, accent = SkyPulse) }
                     alert.assigned_to_name?.let { InfoChip(text = it, accent = SignalEmerald) }
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (canAccept) {
                     GradientActionButton(
                         text = "Принять вызов",
@@ -705,13 +727,13 @@ private fun RescuerAlertCard(
 @Composable
 private fun StatusChip(data: StatusBadgeData) {
     Surface(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = data.background
     ) {
         Text(
             text = data.label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.labelSmall,
             color = data.textColor,
             fontWeight = FontWeight.SemiBold
         )
@@ -722,12 +744,12 @@ private fun StatusChip(data: StatusBadgeData) {
 private fun InfoChip(text: String, accent: Color = Color.White.copy(alpha = 0.18f)) {
     Surface(
         color = accent.copy(alpha = 0.18f),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, accent.copy(alpha = 0.25f))
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             style = MaterialTheme.typography.labelSmall,
             color = Color.White.copy(alpha = 0.85f)
         )
@@ -746,22 +768,35 @@ private fun GradientActionButton(
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(18.dp),
+            .height(48.dp),
+        shape = RoundedCornerShape(16.dp),
         contentPadding = PaddingValues()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.linearGradient(gradient))
-                .clip(RoundedCornerShape(18.dp))
-                .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp))
-                .padding(horizontal = 18.dp),
+                .clip(RoundedCornerShape(16.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
+                .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(leadingIcon, contentDescription = null, tint = Color.White)
-                Text(text = text, color = Color.White, style = MaterialTheme.typography.bodyMedium)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp), 
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    leadingIcon, 
+                    contentDescription = null, 
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = text, 
+                    color = Color.White, 
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

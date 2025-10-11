@@ -23,6 +23,7 @@ import com.example.myapplication.data.preferences.PreferencesManager
 import com.example.myapplication.service.AlertNotificationService
 import com.example.myapplication.service.AlertSoundManager
 import com.example.myapplication.service.LocationManager
+import com.example.myapplication.service.WebSocketManager
 import com.example.myapplication.ui.screen.LoginScreen
 import com.example.myapplication.ui.screen.RescuerDashboard
 import com.example.myapplication.ui.screen.CitizenDashboard
@@ -170,9 +171,26 @@ fun RescueApp(
             // Start notification service only for rescuers
             if (user.role == "rescuer") {
                 try {
+                    android.util.Log.d("MainActivity", "Starting notification service for rescuer...")
+                    
+                    // Request notification permissions if needed
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            android.util.Log.w("MainActivity", "⚠️ Notification permission not granted!")
+                            Toast.makeText(context, "Разрешите уведомления в настройках", Toast.LENGTH_LONG).show()
+                        } else {
+                            android.util.Log.d("MainActivity", "✅ Notification permission already granted")
+                        }
+                    }
+                    
                     AlertNotificationService.start(context, user.id, token)
+                    android.util.Log.d("MainActivity", "✅ Notification service started successfully")
                 } catch (e: Exception) {
-                    android.util.Log.e("MainActivity", "Failed to start notification service", e)
+                    android.util.Log.e("MainActivity", "❌ Failed to start notification service", e)
                     Toast.makeText(context, "Ошибка запуска сервиса: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -186,6 +204,25 @@ fun RescueApp(
         if (isLoggedIn && accessToken != null) {
             loadAlerts(accessToken!!) { result ->
                 result.onSuccess { alerts = it }
+            }
+        }
+    }
+    
+    // Listen to WebSocket updates for rescuers
+    LaunchedEffect(isLoggedIn, currentUser?.role) {
+        if (isLoggedIn && currentUser?.role == "rescuer" && accessToken != null) {
+            android.util.Log.d("MainActivity", "🎧 Starting to listen for WebSocket alerts...")
+            WebSocketManager.newAlert.collect { alert ->
+                if (alert != null) {
+                    android.util.Log.d("MainActivity", "🚨 WebSocket alert received in UI! ID: ${alert.id}")
+                    // Auto-refresh alerts when new alert comes
+                    loadAlerts(accessToken!!) { result ->
+                        result.onSuccess { 
+                            alerts = it
+                            android.util.Log.d("MainActivity", "✅ Alerts refreshed! Count: ${it.size}")
+                        }
+                    }
+                }
             }
         }
     }
@@ -218,9 +255,26 @@ fun RescueApp(
                             // Start notification service only for rescuers
                             if (user.role == "rescuer") {
                                 try {
+                                    android.util.Log.d("MainActivity", "Starting notification service for rescuer after login...")
+                                    
+                                    // Check notification permissions
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        if (ContextCompat.checkSelfPermission(
+                                                context,
+                                                Manifest.permission.POST_NOTIFICATIONS
+                                            ) != PackageManager.PERMISSION_GRANTED
+                                        ) {
+                                            android.util.Log.w("MainActivity", "⚠️ Notification permission not granted!")
+                                            Toast.makeText(context, "Разрешите уведомления в настройках", Toast.LENGTH_LONG).show()
+                                        } else {
+                                            android.util.Log.d("MainActivity", "✅ Notification permission already granted")
+                                        }
+                                    }
+                                    
                                     AlertNotificationService.start(context, user.id, token)
+                                    android.util.Log.d("MainActivity", "✅ Notification service started after login")
                                 } catch (e: Exception) {
-                                    android.util.Log.e("MainActivity", "Failed to start notification service", e)
+                                    android.util.Log.e("MainActivity", "❌ Failed to start notification service", e)
                                     Toast.makeText(context, "Ошибка запуска сервиса: ${e.message}", Toast.LENGTH_LONG).show()
                                 }
                             }

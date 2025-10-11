@@ -3,6 +3,7 @@ package com.example.myapplication.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.collectLatest
 
 class AlertNotificationService : Service() {
     
-    private lateinit var webSocketManager: WebSocketManager
     private lateinit var alertSoundManager: AlertSoundManager
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
@@ -56,7 +56,6 @@ class AlertNotificationService : Service() {
         Log.d("AlertNotificationService", "Service created")
         
         alertSoundManager = AlertSoundManager(this)
-        webSocketManager = WebSocketManager()
         
         createNotificationChannel()
     }
@@ -79,12 +78,16 @@ class AlertNotificationService : Service() {
             
             // Запускаем foreground notification
             val notification = createForegroundNotification()
-            startForeground(FOREGROUND_NOTIFICATION_ID, notification)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(FOREGROUND_NOTIFICATION_ID, notification)
+            }
             
             // Подключаемся к WebSocket
             try {
                 Log.d("AlertNotificationService", "Connecting to WebSocket...")
-                webSocketManager.connect(userId, token)
+                WebSocketManager.connect(userId, token)
                 Log.d("AlertNotificationService", "WebSocket connection initiated")
             } catch (e: Exception) {
                 Log.e("AlertNotificationService", "WebSocket connection failed", e)
@@ -93,33 +96,58 @@ class AlertNotificationService : Service() {
             // Слушаем новые вызовы
             serviceScope.launch {
                 try {
-                    webSocketManager.newAlert.collectLatest { alert ->
-                        alert?.let {
-                            Log.d("AlertNotificationService", "New alert received: ${it.id}")
+                    Log.d("AlertNotificationService", "Started listening for new alerts...")
+                    WebSocketManager.newAlert.collectLatest { alert ->
+                        if (alert != null) {
+                            Log.d("AlertNotificationService", "🚨🚨🚨 NEW ALERT RECEIVED!")
+                            Log.d("AlertNotificationService", "Alert ID: ${alert.id}")
+                            Log.d("AlertNotificationService", "Alert Type: ${alert.type}")
+                            Log.d("AlertNotificationService", "Alert Title: ${alert.title}")
+                            Log.d("AlertNotificationService", "Alert Status: ${alert.status}")
+                            Log.d("AlertNotificationService", "Alert Team ID: ${alert.team_id}")
                             
-                            // Проигрываем сирену
-                            try {
-                                alertSoundManager.playAlertSound()
-                            } catch (e: Exception) {
-                                Log.e("AlertNotificationService", "Failed to play alert sound", e)
-                            }
+                            // ВАЖНО: Проигрываем сирену ТОЛЬКО когда вызов назначен команде!
+                            // status = "assigned" И team_id != null (оператор назначил команду)
+                            val shouldPlaySiren = alert.status == "assigned" && alert.team_id != null
                             
-                            // Показываем уведомление
-                            try {
-                                showAlertNotification(it.title ?: "Новый вызов", it.description ?: "")
-                            } catch (e: Exception) {
-                                Log.e("AlertNotificationService", "Failed to show notification", e)
+                            if (shouldPlaySiren) {
+                                Log.d("AlertNotificationService", "✅ Alert is ASSIGNED to team! Playing siren...")
+                                
+                                // Проигрываем сирену
+                                try {
+                                    Log.d("AlertNotificationService", "Playing alert sound...")
+                                    alertSoundManager.playAlertSound()
+                                    Log.d("AlertNotificationService", "Alert sound started successfully")
+                                } catch (e: Exception) {
+                                    Log.e("AlertNotificationService", "❌ Failed to play alert sound", e)
+                                }
+                                
+                                // Показываем уведомление
+                                try {
+                                    Log.d("AlertNotificationService", "Showing notification...")
+                                    showAlertNotification(alert.title ?: "Новый вызов", alert.description ?: "")
+                                    Log.d("AlertNotificationService", "Notification shown successfully")
+                                } catch (e: Exception) {
+                                    Log.e("AlertNotificationService", "❌ Failed to show notification", e)
+                                }
+                                
+                                // Автоматически останавливаем сирену через 30 секунд
+                                serviceScope.launch {
+                                    delay(30000)
+                                    Log.d("AlertNotificationService", "Auto-stopping siren after 30 seconds")
+                                    alertSoundManager.stopAlertSound()
+                                }
+                            } else {
+                                Log.d("AlertNotificationService", "⏭️ Alert skipped - not assigned to team yet")
+                                Log.d("AlertNotificationService", "   Status: ${alert.status}, Team ID: ${alert.team_id}")
                             }
-                            
-                            // Автоматически останавливаем сирену через 30 секунд
-                            serviceScope.launch {
-                                delay(30000)
-                                alertSoundManager.stopAlertSound()
-                            }
+                        } else {
+                            Log.d("AlertNotificationService", "Received null alert, skipping...")
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("AlertNotificationService", "Error in alert collection", e)
+                    Log.e("AlertNotificationService", "❌ Error in alert collection", e)
+                    e.printStackTrace()
                 }
             }
             
@@ -137,7 +165,7 @@ class AlertNotificationService : Service() {
         Log.d("AlertNotificationService", "Service destroyed")
         
         alertSoundManager.release()
-        webSocketManager.disconnect()
+        WebSocketManager.disconnect()
         serviceScope.cancel()
     }
     
@@ -217,6 +245,10 @@ class AlertNotificationService : Service() {
      * Показать уведомление о новом вызове
      */
     private fun showAlertNotification(title: String, description: String) {
+        Log.d("AlertNotificationService", "📢 showAlertNotification() called")
+        Log.d("AlertNotificationService", "Title: $title")
+        Log.d("AlertNotificationService", "Description: $description")
+        
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -239,6 +271,7 @@ class AlertNotificationService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         
+        Log.d("AlertNotificationService", "Building notification...")
         val notification = NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
             .setContentTitle("🚨 ЭКСТРЕННЫЙ ВЫЗОВ!")
             .setContentText(title)
@@ -260,7 +293,10 @@ class AlertNotificationService : Service() {
             .setFullScreenIntent(pendingIntent, true)
             .build()
         
+        Log.d("AlertNotificationService", "Notification built, showing...")
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        val notificationId = System.currentTimeMillis().toInt()
+        notificationManager.notify(notificationId, notification)
+        Log.d("AlertNotificationService", "✅ Notification shown with ID: $notificationId")
     }
 }

@@ -11,7 +11,7 @@ import okhttp3.*
 import okio.ByteString
 import java.util.concurrent.TimeUnit
 
-class WebSocketManager {
+object WebSocketManager {
     
     private var webSocket: WebSocket? = null
     private val client = OkHttpClient.Builder()
@@ -27,7 +27,7 @@ class WebSocketManager {
     private val _newAlert = MutableStateFlow<SOSAlert?>(null)
     val newAlert: StateFlow<SOSAlert?> = _newAlert
     
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope? = null
     private val gson = Gson()
     
     enum class ConnectionState {
@@ -43,6 +43,9 @@ class WebSocketManager {
             return
         }
         
+        // Создаем новый scope при подключении
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        
         _connectionState.value = ConnectionState.CONNECTING
         Log.d("WebSocketManager", "Connecting to: $wsUrl/$userId")
         
@@ -57,7 +60,7 @@ class WebSocketManager {
                 _connectionState.value = ConnectionState.CONNECTED
                 
                 // Send ping to keep connection alive
-                scope.launch {
+                scope?.launch {
                     while (_connectionState.value == ConnectionState.CONNECTED) {
                         webSocket.send("{\"type\":\"ping\"}")
                         delay(30000) // 30 seconds
@@ -85,7 +88,7 @@ class WebSocketManager {
                 _connectionState.value = ConnectionState.DISCONNECTED
                 
                 // Попытка переподключения через 5 секунд
-                scope.launch {
+                scope?.launch {
                     delay(5000)
                     if (_connectionState.value == ConnectionState.DISCONNECTED) {
                         Log.d("WebSocketManager", "Attempting to reconnect...")
@@ -100,7 +103,7 @@ class WebSocketManager {
                 _connectionState.value = ConnectionState.ERROR
                 
                 // Попытка переподключения через 10 секунд
-                scope.launch {
+                scope?.launch {
                     delay(10000)
                     Log.d("WebSocketManager", "🔄 Attempting to reconnect after failure...")
                     connect(userId, token)
@@ -117,14 +120,19 @@ class WebSocketManager {
             Log.d("WebSocketManager", "🔍 Parsing message: $text")
             val message = gson.fromJson(text, WebSocketMessage::class.java)
             
+            Log.d("WebSocketManager", "Message type: ${message.type}")
+            Log.d("WebSocketManager", "Message data: ${message.data}")
+            
             when (message.type) {
                 "new_alert" -> {
-                    Log.d("WebSocketManager", "🚨 NEW ALERT received!")
+                    Log.d("WebSocketManager", "🚨🚨🚨 NEW ALERT MESSAGE TYPE DETECTED!")
                     message.data?.let { data ->
+                        Log.d("WebSocketManager", "Alert data: $data")
                         val alert = gson.fromJson(gson.toJson(data), SOSAlert::class.java)
+                        Log.d("WebSocketManager", "Parsed alert: id=${alert.id}, type=${alert.type}, status=${alert.status}, title=${alert.title}")
                         _newAlert.value = alert
-                        Log.d("WebSocketManager", "Alert details: id=${alert.id}, type=${alert.type}, status=${alert.status}")
-                    }
+                        Log.d("WebSocketManager", "Alert set to StateFlow, current value: ${_newAlert.value?.id}")
+                    } ?: Log.e("WebSocketManager", "❌ Alert data is null!")
                 }
                 "alert_updated" -> {
                     Log.d("WebSocketManager", "📝 Alert update received")
@@ -147,6 +155,7 @@ class WebSocketManager {
             }
         } catch (e: Exception) {
             Log.e("WebSocketManager", "❌ Error handling message: ${e.message}", e)
+            e.printStackTrace()
         }
     }
     
@@ -164,7 +173,8 @@ class WebSocketManager {
         webSocket?.close(1000, "User disconnect")
         webSocket = null
         _connectionState.value = ConnectionState.DISCONNECTED
-        scope.cancel()
+        scope?.cancel()
+        scope = null
     }
     
     /**
