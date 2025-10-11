@@ -104,6 +104,7 @@ fun CitizenDashboard(
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
     var showSuccess by remember { mutableStateOf(false) }
+    var showRecommendations by remember { mutableStateOf(false) }
 
     LaunchedEffect(showSuccess) {
         if (showSuccess) {
@@ -200,9 +201,17 @@ fun CitizenDashboard(
                 onCreateAlert(alertType, finalTitle, finalDescription)
                 showCreateDialog = false
                 showSuccess = true
+                showRecommendations = true
                 title = ""
                 description = ""
             }
+        )
+    }
+    
+    if (showRecommendations) {
+        RecommendationsDialog(
+            emergencyType = alertType,
+            onDismiss = { showRecommendations = false }
         )
     }
 }
@@ -226,21 +235,21 @@ private fun CitizenHeroCard(
                         colors = listOf(AuroraRose, AuroraViolet)
                     )
                 )
-                .padding(16.dp)
+                .padding(12.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.18f)),
                             contentAlignment = Alignment.Center
@@ -249,13 +258,13 @@ private fun CitizenHeroCard(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
                                 tint = Color.White.copy(alpha = 0.9f),
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
                                 text = user.full_name,
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 color = Color.White
                             )
                             Text(
@@ -269,20 +278,22 @@ private fun CitizenHeroCard(
                     IconButton(
                         onClick = onLogout,
                         modifier = Modifier
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.16f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.ExitToApp,
                             contentDescription = "Выход",
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatusChip(
                         icon = Icons.Default.CheckCircle,
@@ -291,12 +302,7 @@ private fun CitizenHeroCard(
                     )
                     StatusChip(
                         icon = Icons.Default.LocationOn,
-                        label = "GPS синхрон",
-                        background = Color.White.copy(alpha = 0.18f)
-                    )
-                    StatusChip(
-                        icon = Icons.Default.NotificationImportant,
-                        label = "Оповещения",
+                        label = "GPS",
                         background = Color.White.copy(alpha = 0.18f)
                     )
                 }
@@ -311,19 +317,19 @@ private fun StatusChip(icon: androidx.compose.ui.graphics.vector.ImageVector, la
         modifier = Modifier
             .clip(RoundedCornerShape(100))
             .background(background)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.9f),
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(14.dp)
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             color = Color.White
         )
     }
@@ -338,55 +344,31 @@ private fun SosControlCard(
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(36.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = GlassDark.copy(alpha = 0.82f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 18.dp)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = GlassDark.copy(alpha = 0.85f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = "Экстренный вызов",
                 style = MaterialTheme.typography.headlineSmall,
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Выберите тип происшествия и нажмите большую кнопку, чтобы мгновенно отправить сигнал",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.72f),
+                text = "Нажмите большую кнопку для мгновенной отправки сигнала",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center
             )
 
             LargeSosButton(onClick = onTapSos)
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "Вы выбрали: ${selectedAction.title}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    actions.take(3).forEach { action ->
-                        EmergencyTypePill(
-                            action = action,
-                            selected = action.code == selectedAction.code,
-                            onClick = { onSelect(action.code) }
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -406,13 +388,13 @@ private fun LargeSosButton(onClick: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .size(220.dp)
+            .size(180.dp)
             .scale(scale),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .size(220.dp)
+                .size(180.dp)
                 .clip(CircleShape)
                 .background(
                     brush = Brush.radialGradient(
@@ -423,7 +405,7 @@ private fun LargeSosButton(onClick: () -> Unit) {
 
         Box(
             modifier = Modifier
-                .size(190.dp)
+                .size(160.dp)
                 .clip(CircleShape)
                 .background(
                     brush = Brush.linearGradient(
@@ -501,17 +483,18 @@ private fun QuickActionsSection(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = "Выберите ситуацию",
-            style = MaterialTheme.typography.titleLarge,
-            color = Color.White
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
         )
         Text(
             text = "Опишите ситуацию максимально подробно",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.68f)
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.7f)
         )
 
         LazyRow(
@@ -530,28 +513,34 @@ private fun QuickActionsSection(
 
 @Composable
 private fun QuickActionCard(action: QuickAction, selected: Boolean, onSelect: () -> Unit) {
-    val borderColor = if (selected) Color.White.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.18f)
+    val borderColor = if (selected) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.15f)
+    val borderWidth = if (selected) 2.dp else 1.dp
+    
     Box(
         modifier = Modifier
-            .width(200.dp)
-            .height(120.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .width(180.dp)
+            .height(110.dp)
+            .clip(RoundedCornerShape(24.dp))
             .background(Brush.linearGradient(action.gradient))
-            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
+            .border(borderWidth, borderColor, RoundedCornerShape(24.dp))
             .clickable(onClick = onSelect)
-            .padding(14.dp)
+            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(text = action.emoji, fontSize = 28.sp)
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = action.emoji, 
+                fontSize = 32.sp
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = action.title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = action.description,
@@ -950,4 +939,135 @@ private fun defaultTitleForType(type: String): String = when (type) {
     "search_rescue" -> "Поисковая операция"
     "ecological" -> "Экологическая тревога"
     else -> "Экстренная ситуация"
+}
+
+@Composable
+private fun RecommendationsDialog(
+    emergencyType: String,
+    onDismiss: () -> Unit
+) {
+    val recommendations = remember(emergencyType) {
+        when (emergencyType) {
+            "medical" -> listOf(
+                "🩺 Сохраняйте спокойствие, не паникуйте",
+                "📍 Оставайтесь на месте, где можете быть легко обнаружены",
+                "👥 Если есть другие люди, попросите их о помощи",
+                "🆘 Не перемещайте пострадавшего без крайней необходимости",
+                "📞 Держите телефон заряженным и рядом с собой"
+            )
+            "fire" -> listOf(
+                "🔥 Покиньте здание как можно скорее",
+                "🚪 Закройте двери за собой, чтобы замедлить распространение огня",
+                "⬇️ Двигайтесь пригнувшись, дым скапливается вверху",
+                "🚫 Не пользуйтесь лифтом",
+                "📍 Соберитесь в безопасном месте и ждите спасателей"
+            )
+            "police" -> listOf(
+                "🏃 Если есть опасность, уйдите в безопасное место",
+                "📸 Запомните приметы: внешность, одежду, направление",
+                "👥 Не вступайте в конфликт, ваша безопасность важнее",
+                "📍 Оставайтесь на виду, в людном месте",
+                "🚨 Следуйте указаниям прибывших сотрудников"
+            )
+            "water_rescue" -> listOf(
+                "🌊 Не паникуйте, сохраняйте силы",
+                "🆘 Подавайте сигналы: машите руками, кричите",
+                "🏊 Держитесь на плаву, не боритесь с течением",
+                "🛟 Используйте любые плавучие предметы рядом",
+                "👀 Следите за спасателями, не теряйте их из виду"
+            )
+            "mountain_rescue" -> listOf(
+                "🏔️ Оставайтесь на месте, не пытайтесь спускаться сами",
+                "🧥 Сохраняйте тепло, укройтесь от ветра",
+                "💡 Используйте фонарик или светоотражающие предметы",
+                "📱 Берегите заряд телефона",
+                "🆘 Подавайте сигналы: свисток, зеркало, яркая одежда"
+            )
+            "search_rescue" -> listOf(
+                "📍 Оставайтесь на месте, где вас легче найти",
+                "🔊 Периодически подавайте звуковые сигналы",
+                "🔥 Разведите костер, если это безопасно",
+                "💧 Экономьте воду и еду",
+                "👁️ Следите за появлением спасателей"
+            )
+            "ecological" -> listOf(
+                "💨 Покиньте зону загрязнения, двигайтесь против ветра",
+                "😷 Закройте дыхательные пути влажной тканью",
+                "🚪 Закройте окна и двери",
+                "👕 Снимите загрязненную одежду",
+                "🚿 При возможности примите душ"
+            )
+            else -> listOf(
+                "📱 Сохраняйте связь с диспетчером",
+                "📍 Оставайтесь на месте",
+                "🆘 Следуйте инструкциям оператора",
+                "👥 Помогайте другим, если это безопасно",
+                "⏰ Спасатели уже в пути"
+            )
+        }
+    }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SignalEmerald
+                )
+            ) {
+                Text("Понятно")
+            }
+        },
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "💡",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Text(
+                    text = "Рекомендации",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Спасательная бригада уже получила ваш сигнал. Пока они в пути:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.95f),
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                recommendations.forEach { recommendation ->
+                    Text(
+                        text = recommendation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Помощь уже в пути! Оставайтесь на связи.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SignalEmerald,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    )
 }
